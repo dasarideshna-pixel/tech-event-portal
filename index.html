@@ -8,13 +8,19 @@
 </head>
 <body>
 
-  <!-- Navigation Bar -->
+  <!-- Top Navigation Bar -->
   <header class="navbar">
     <div class="nav-wrapper">
       <a href="#" class="brand">Event<span>Hub</span></a>
       <div class="nav-controls">
+        <button id="view-winnings-btn" class="btn btn-secondary" title="View Competition Progress & Winnings">
+          🏆 My Winnings & Rounds
+        </button>
         <button id="view-registered-btn" class="btn btn-secondary">
           My Passes (<span id="reg-badge">0</span>)
+        </button>
+        <button id="notif-btn" class="btn btn-icon notif-trigger" title="Notifications">
+          🔔<span id="notif-badge" class="notif-pill">3</span>
         </button>
         <button id="export-csv-btn" class="btn btn-secondary" title="Export attendee roster">
           📊 Export CSV
@@ -35,7 +41,7 @@
         <a href="#events-section" class="btn btn-primary btn-cta">🚀 Explore All Events</a>
       </div>
 
-      <!-- Real-time Search & Filter System -->
+      <!-- Real-time Search & Filter Controls -->
       <div class="filter-controls" id="events-section">
         <input type="text" id="search-bar" placeholder="Search by event title or keyword..." autocomplete="off">
         <select id="category-select">
@@ -50,7 +56,7 @@
     </div>
   </section>
 
-  <!-- Event Listing Section -->
+  <!-- Events Listing Grid -->
   <main class="container main-content">
     <div class="section-title-row">
       <h2>Available Events</h2>
@@ -64,7 +70,7 @@
     </div>
   </main>
 
-  <!-- Event Registration Modal -->
+  <!-- Registration Modal -->
   <div id="modal-backdrop" class="modal-layer" style="display: none;">
     <div class="modal-box">
       <div class="modal-header">
@@ -76,7 +82,7 @@
         <div class="input-field">
           <label for="event-select-field">Selected Event</label>
           <select id="event-select-field">
-            <!-- Populated dynamically via JS -->
+            <!-- Dynamically injected -->
           </select>
         </div>
 
@@ -127,20 +133,19 @@
       </div>
     </div>
   </div>
-  <!-- Notification Center Dropdown / Modal -->
+
+  <!-- Notification Center Modal -->
   <div id="notif-backdrop" class="modal-layer" style="display: none;">
     <div class="modal-box">
       <div class="modal-header">
         <h3>🔔 Live Campus Updates</h3>
         <button id="close-notif-btn" class="close-x">&times;</button>
       </div>
-      <div id="notif-list" class="notif-feed">
-        <!-- Rendered dynamically -->
-      </div>
+      <div id="notif-list" class="notif-feed"></div>
     </div>
   </div>
 
-  <!-- Rounds Tracker & "All My Winnings" Vault Modal -->
+  <!-- Rounds Tracker & Winnings Vault Modal -->
   <div id="winnings-backdrop" class="modal-layer" style="display: none;">
     <div class="modal-box modal-box-wide">
       <div class="modal-header">
@@ -148,7 +153,7 @@
         <button id="close-winnings-btn" class="close-x">&times;</button>
       </div>
       
-      <!-- Rounds & Progress Tracker -->
+      <!-- Stepper -->
       <div class="progress-section">
         <div class="progress-header">
           <span><strong>Hackathon Progression:</strong> Round 3 of 4</span>
@@ -165,37 +170,14 @@
         </div>
       </div>
 
-      <!-- Winnings & Trophy Room -->
+      <!-- Winnings Grid -->
       <h4 class="subheading-vault">🎖️ Hall of Fame & Badges</h4>
-      <div id="winnings-grid" class="trophy-grid">
-        <!-- Rendered dynamically -->
-      </div>
+      <div id="winnings-grid" class="trophy-grid"></div>
     </div>
   </div>
 
   <!-- Toast Notification Popup -->
   <div id="toast-message" class="toast-popup"></div>
-  <!-- Navigation Bar Update -->
-  <header class="navbar">
-    <div class="nav-wrapper">
-      <a href="#" class="brand">Event<span>Hub</span></a>
-      <div class="nav-controls">
-        <button id="view-winnings-btn" class="btn btn-secondary" title="View Competition Progress & Winnings">
-          🏆 My Winnings & Rounds
-        </button>
-        <button id="view-registered-btn" class="btn btn-secondary">
-          My Passes (<span id="reg-badge">0</span>)
-        </button>
-        <button id="notif-btn" class="btn btn-icon notif-trigger" title="Notifications">
-          🔔<span id="notif-badge" class="notif-pill">3</span>
-        </button>
-        <button id="export-csv-btn" class="btn btn-secondary" title="Export attendee roster">
-          📊 Export CSV
-        </button>
-        <button id="theme-btn" class="btn btn-icon" title="Toggle theme">🌙</button>
-      </div>
-    </div>
-  </header>
 
   <script src="script.js"></script>
 </body>
