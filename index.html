@@ -8,27 +8,36 @@
 </head>
 <body>
 
-  <!-- Top Navigation Bar -->
+  <!-- Navigation Bar -->
   <header class="navbar">
     <div class="nav-wrapper">
       <a href="#" class="brand">Event<span>Hub</span></a>
       <div class="nav-controls">
         <button id="view-registered-btn" class="btn btn-secondary">
-          My Registrations (<span id="reg-badge">0</span>)
+          My Passes (<span id="reg-badge">0</span>)
+        </button>
+        <button id="export-csv-btn" class="btn btn-secondary" title="Export attendee roster">
+          📊 Export CSV
         </button>
         <button id="theme-btn" class="btn btn-icon" title="Toggle theme">🌙</button>
       </div>
     </div>
   </header>
 
-  <!-- Hero Section & Filters -->
+  <!-- Hero Section -->
   <section class="hero-section">
     <div class="container hero-container">
+      <div class="hero-badge">⚡ Flagship Tech Symposium 2026</div>
       <h1>Campus Tech Events & Hackathons</h1>
-      <p>Discover workshops, coding competitions, and guest lectures happening this season.</p>
+      <p>Discover hands-on workshops, competitive coding sprints, and keynote symposiums happening this season.</p>
+      
+      <div class="hero-actions">
+        <a href="#events-section" class="btn btn-primary btn-cta">🚀 Explore All Events</a>
+      </div>
 
-      <div class="filter-controls">
-        <input type="text" id="search-bar" placeholder="Search by name or keyword..." autocomplete="off">
+      <!-- Real-time Search & Filter System -->
+      <div class="filter-controls" id="events-section">
+        <input type="text" id="search-bar" placeholder="Search by event title or keyword..." autocomplete="off">
         <select id="category-select">
           <option value="All">All Domains</option>
           <option value="AI/ML">AI / Machine Learning</option>
@@ -41,7 +50,7 @@
     </div>
   </section>
 
-  <!-- Events Grid -->
+  <!-- Event Listing Section -->
   <main class="container main-content">
     <div class="section-title-row">
       <h2>Available Events</h2>
@@ -50,12 +59,12 @@
 
     <div id="events-container" class="cards-grid"></div>
 
-    <div id="no-events-msg" class="empty-state" style="display:none;">
+    <div id="no-events-msg" class="empty-state" style="display: none;">
       <p>No events found matching your search criteria.</p>
     </div>
   </main>
 
-  <!-- Registration Modal -->
+  <!-- Event Registration Modal -->
   <div id="modal-backdrop" class="modal-layer" style="display: none;">
     <div class="modal-box">
       <div class="modal-header">
@@ -64,7 +73,12 @@
       </div>
 
       <form id="reg-form" novalidate>
-        <input type="hidden" id="form-event-id">
+        <div class="input-field">
+          <label for="event-select-field">Selected Event</label>
+          <select id="event-select-field">
+            <!-- Populated dynamically via JS -->
+          </select>
+        </div>
 
         <div class="input-field">
           <label for="user-name">Full Name</label>
@@ -89,7 +103,7 @@
     </div>
   </div>
 
-  <!-- Registered Events Modal -->
+  <!-- Registered Passes Modal -->
   <div id="registered-backdrop" class="modal-layer" style="display: none;">
     <div class="modal-box modal-box-wide">
       <div class="modal-header">
@@ -100,7 +114,7 @@
     </div>
   </div>
 
-  <!-- Printable Digital Pass Modal -->
+  <!-- Printable Digital Attendee Pass Modal -->
   <div id="pass-backdrop" class="modal-layer" style="display: none;">
     <div class="modal-box pass-card-container">
       <div class="modal-header">
@@ -117,7 +131,6 @@
   <!-- Toast Notification Popup -->
   <div id="toast-message" class="toast-popup"></div>
 
-  <!-- Main JavaScript Logic -->
   <script src="script.js"></script>
 </body>
 </html>

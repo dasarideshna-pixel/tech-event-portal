@@ -1,4 +1,4 @@
-// Master Event Data with Capacity Limits
+// Master Event Data (6 Diverse Technical Events)
 const eventList = [
   {
     id: "e101",
@@ -8,7 +8,7 @@ const eventList = [
     time: "09:00",
     venue: "Main Audi, Ground Floor",
     totalSeats: 50,
-    description: "24-hour sprint to build solutions using Web and API integration."
+    description: "24-hour sprint to build solutions using Web, Microservices, and API integrations."
   },
   {
     id: "e102",
@@ -18,7 +18,7 @@ const eventList = [
     time: "10:00",
     venue: "CSE Seminar Hall",
     totalSeats: 30,
-    description: "Hands-on workshop covering transformer architectures and model fine-tuning."
+    description: "Hands-on workshop covering transformer architectures and model fine-tuning techniques."
   },
   {
     id: "e103",
@@ -28,7 +28,7 @@ const eventList = [
     time: "11:30",
     venue: "Computer Lab 4",
     totalSeats: 25,
-    description: "Test your skills in cryptography, binary analysis, and web security."
+    description: "Test your offensive and defensive skills in cryptography, binary reverse engineering, and web security."
   },
   {
     id: "e104",
@@ -38,7 +38,7 @@ const eventList = [
     time: "14:00",
     venue: "Online / CodePlatform",
     totalSeats: 100,
-    description: "Solve algorithmic problems under time constraints. DSA focused."
+    description: "Solve competitive algorithmic challenges under strict time constraints. DSA focused."
   },
   {
     id: "e105",
@@ -48,7 +48,7 @@ const eventList = [
     time: "09:30",
     venue: "Mechanical Workshop Quad",
     totalSeats: 40,
-    description: "Showcase of quadcopters, micro-controllers, and embedded ROS systems."
+    description: "Live showcase of quadcopters, micro-controllers, and embedded ROS vision systems."
   },
   {
     id: "e106",
@@ -58,11 +58,11 @@ const eventList = [
     time: "15:00",
     venue: "Virtual Room A",
     totalSeats: 35,
-    description: "Building scalable ingestion and preprocessing pipelines with Python."
+    description: "Building scalable ingestion, automated ETL, and predictive preprocessing pipelines with Python."
   }
 ];
 
-// Persistent State
+// Persistent State from LocalStorage
 let userRegistrations = JSON.parse(localStorage.getItem("event_registrations")) || [];
 
 // DOM References
@@ -80,13 +80,14 @@ const passBackdrop = document.getElementById("pass-backdrop");
 const passContent = document.getElementById("pass-content");
 const regForm = document.getElementById("reg-form");
 const modalTitle = document.getElementById("modal-title");
-const formEventId = document.getElementById("form-event-id");
+const eventSelectField = document.getElementById("event-select-field");
 const registeredList = document.getElementById("registered-list");
 
-// Theme & Toast
+// Theme & Notifications
 const themeBtn = document.getElementById("theme-btn");
 const toast = document.getElementById("toast-message");
 
+// Initialize on Load
 window.addEventListener("DOMContentLoaded", () => {
   setupTheme();
   renderEvents();
@@ -108,13 +109,13 @@ themeBtn.addEventListener("click", () => {
   themeBtn.textContent = target === "dark" ? "☀️" : "🌙";
 });
 
-// Calculate Remaining Seats
+// Capacity Calculation
 function getRemainingSeats(eventId, total) {
   const taken = userRegistrations.filter(r => r.eventId === eventId).length;
   return Math.max(0, total - taken);
 }
 
-// Render Event Cards
+// Render Event Cards Grid
 function renderEvents() {
   const search = searchBar.value.toLowerCase().trim();
   const selectedCat = categorySelect.value;
@@ -171,21 +172,80 @@ function renderEvents() {
   });
 }
 
-// Filters
+// Search and Filter Listeners
 searchBar.addEventListener("input", renderEvents);
 categorySelect.addEventListener("change", renderEvents);
 
-// Modal Logic
+// Schedule Conflict Checker
+function checkScheduleConflict(targetEventId) {
+  const targetEvent = eventList.find(e => e.id === targetEventId);
+  if (!targetEvent) return null;
+
+  const conflictingReg = userRegistrations.find(reg => {
+    const regEvent = eventList.find(e => e.id === reg.eventId);
+    return regEvent && regEvent.date === targetEvent.date && regEvent.id !== targetEvent.id;
+  });
+
+  if (conflictingReg) {
+    const conflictEvent = eventList.find(e => e.id === conflictingReg.eventId);
+    return conflictEvent ? conflictEvent.title : null;
+  }
+  return null;
+}
+
+// Modal Handlers
+function populateEventDropdown(selectedId) {
+  eventSelectField.innerHTML = "";
+  eventList.forEach(evt => {
+    const opt = document.createElement("option");
+    opt.value = evt.id;
+    opt.textContent = `${evt.title} (${evt.date})`;
+    if (evt.id === selectedId) opt.selected = true;
+    eventSelectField.appendChild(opt);
+  });
+}
+
 function openRegisterModal(id) {
+  populateEventDropdown(id);
   const targetEvent = eventList.find(e => e.id === id);
   if (!targetEvent) return;
 
-  formEventId.value = targetEvent.id;
   modalTitle.textContent = `Register: ${targetEvent.title}`;
   clearErrors();
   regForm.reset();
+  populateEventDropdown(id);
+
+  // Evaluate conflict warning
+  const conflict = checkScheduleConflict(id);
+  const existingWarning = document.getElementById("conflict-alert");
+  if (existingWarning) existingWarning.remove();
+
+  if (conflict) {
+    const warningDiv = document.createElement("div");
+    warningDiv.id = "conflict-alert";
+    warningDiv.className = "conflict-warning";
+    warningDiv.innerHTML = `⚠️ <strong>Time Slot Warning:</strong> You already hold a pass for <em>"${conflict}"</em> on this date.`;
+    regForm.prepend(warningDiv);
+  }
+
   modalBackdrop.style.display = "flex";
 }
+
+// Listen to dropdown changes inside modal to update conflict warning dynamically
+eventSelectField.addEventListener("change", (e) => {
+  const newId = e.target.value;
+  const conflict = checkScheduleConflict(newId);
+  const existingWarning = document.getElementById("conflict-alert");
+  if (existingWarning) existingWarning.remove();
+
+  if (conflict) {
+    const warningDiv = document.createElement("div");
+    warningDiv.id = "conflict-alert";
+    warningDiv.className = "conflict-warning";
+    warningDiv.innerHTML = `⚠️ <strong>Time Slot Warning:</strong> You already hold a pass for <em>"${conflict}"</em> on this date.`;
+    regForm.prepend(warningDiv);
+  }
+});
 
 document.getElementById("close-modal-btn").addEventListener("click", () => modalBackdrop.style.display = "none");
 document.getElementById("close-reg-modal-btn").addEventListener("click", () => registeredBackdrop.style.display = "none");
@@ -197,7 +257,7 @@ window.addEventListener("click", (e) => {
   if (e.target === passBackdrop) passBackdrop.style.display = "none";
 });
 
-// Form Submission
+// Form Validation & Submission
 regForm.addEventListener("submit", (e) => {
   e.preventDefault();
   clearErrors();
@@ -205,7 +265,7 @@ regForm.addEventListener("submit", (e) => {
   const nameInput = document.getElementById("user-name").value.trim();
   const emailInput = document.getElementById("user-email").value.trim();
   const collegeInput = document.getElementById("user-college").value.trim();
-  const eventId = formEventId.value;
+  const eventId = eventSelectField.value;
 
   let isValid = true;
 
@@ -227,7 +287,7 @@ regForm.addEventListener("submit", (e) => {
 
   if (!isValid) return;
 
-  // Generate a realistic registration ID
+  // Generate a random ticket pass identifier
   const passId = "NX-" + Math.floor(100000 + Math.random() * 900000);
 
   userRegistrations.push({
@@ -242,7 +302,7 @@ regForm.addEventListener("submit", (e) => {
   localStorage.setItem("event_registrations", JSON.stringify(userRegistrations));
 
   modalBackdrop.style.display = "none";
-  showToast("Registration successful! Pass generated.");
+  showToast("Registration confirmed! Digital pass generated.");
   updateBadge();
   renderEvents();
 });
@@ -262,7 +322,36 @@ function getGoogleCalendarUrl(evt) {
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDateTime}/${endDateTime}&details=${details}&location=${location}`;
 }
 
-// Open Digital Pass
+// QR Code SVG Generator
+function generatePassQR(passId) {
+  return `
+    <div class="qr-box">
+      <svg width="86" height="86" viewBox="0 0 100 100" shape-rendering="crispEdges">
+        <rect width="100" height="100" fill="#ffffff" />
+        <rect x="10" y="10" width="30" height="30" fill="#000000" />
+        <rect x="15" y="15" width="20" height="20" fill="#ffffff" />
+        <rect x="20" y="20" width="10" height="10" fill="#000000" />
+        <rect x="60" y="10" width="30" height="30" fill="#000000" />
+        <rect x="65" y="15" width="20" height="20" fill="#ffffff" />
+        <rect x="70" y="20" width="10" height="10" fill="#000000" />
+        <rect x="10" y="60" width="30" height="30" fill="#000000" />
+        <rect x="15" y="65" width="20" height="20" fill="#ffffff" />
+        <rect x="20" y="70" width="10" height="10" fill="#000000" />
+        <rect x="45" y="15" width="6" height="6" fill="#000000" />
+        <rect x="50" y="30" width="6" height="6" fill="#000000" />
+        <rect x="45" y="45" width="12" height="12" fill="#000000" />
+        <rect x="65" y="55" width="8" height="8" fill="#000000" />
+        <rect x="80" y="75" width="8" height="8" fill="#000000" />
+        <rect x="50" y="75" width="6" height="6" fill="#000000" />
+      </svg>
+      <div style="font-size:0.65rem; color:#555; text-align:center; font-family:monospace; margin-top:2px;">
+        ${passId}
+      </div>
+    </div>
+  `;
+}
+
+// Digital Pass Viewer
 window.viewDigitalPass = function(passId) {
   const reg = userRegistrations.find(r => r.passId === passId);
   if (!reg) return;
@@ -281,13 +370,16 @@ window.viewDigitalPass = function(passId) {
       <p><strong>Date & Venue:</strong> ${evt.date} | ${evt.venue}</p>
       <p><strong>Issued On:</strong> ${reg.registeredOn}</p>
     </div>
+    <div class="ticket-qr-section">
+      ${generatePassQR(reg.passId)}
+    </div>
   `;
 
   registeredBackdrop.style.display = "none";
   passBackdrop.style.display = "flex";
 };
 
-// "My Registrations" Drawer
+// "My Passes" View
 document.getElementById("view-registered-btn").addEventListener("click", () => {
   registeredList.innerHTML = "";
 
@@ -309,7 +401,7 @@ document.getElementById("view-registered-btn").addEventListener("click", () => {
           <div class="reg-row-actions">
             <button class="btn btn-secondary btn-sm" onclick="viewDigitalPass('${item.passId}')">🎫 View Pass</button>
             <a class="btn btn-secondary btn-sm" href="${calUrl}" target="_blank" rel="noopener noreferrer">📅 Add to Cal</a>
-            <button class="btn-remove btn-sm" onclick="cancelRegistration('${match.id}')">Cancel</button>
+            <button class="btn-remove btn-sm" onclick="cancelRegistration('${item.passId}')">Cancel</button>
           </div>
         </div>
       `;
@@ -320,18 +412,59 @@ document.getElementById("view-registered-btn").addEventListener("click", () => {
   registeredBackdrop.style.display = "flex";
 });
 
-function cancelRegistration(id) {
-  userRegistrations = userRegistrations.filter(r => r.eventId !== id);
+function cancelRegistration(passId) {
+  userRegistrations = userRegistrations.filter(r => r.passId !== passId);
   localStorage.setItem("event_registrations", JSON.stringify(userRegistrations));
   updateBadge();
   renderEvents();
   document.getElementById("view-registered-btn").click();
-  showToast("Registration cancelled.");
+  showToast("Registration pass cancelled.");
 }
 
 function updateBadge() {
   regBadge.textContent = userRegistrations.length;
 }
+
+// Client-side CSV Exporter
+document.getElementById("export-csv-btn").addEventListener("click", () => {
+  if (userRegistrations.length === 0) {
+    showToast("No registrations found to export.");
+    return;
+  }
+
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Pass ID,Event Name,Date,Venue,Attendee Name,Email,College,Issued Date\r\n";
+
+  userRegistrations.forEach(r => {
+    const evt = eventList.find(e => e.id === r.eventId);
+    const eventName = evt ? `"${evt.title.replace(/"/g, '""')}"` : "N/A";
+    const eventDate = evt ? evt.date : "N/A";
+    const eventVenue = evt ? `"${evt.venue.replace(/"/g, '""')}"` : "N/A";
+
+    const row = [
+      r.passId,
+      eventName,
+      eventDate,
+      eventVenue,
+      `"${r.name}"`,
+      `"${r.email}"`,
+      `"${r.college}"`,
+      r.registeredOn || new Date().toLocaleDateString()
+    ].join(",");
+
+    csvContent += row + "\r\n";
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `event_attendees_${Date.now()}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  showToast("Attendee roster exported successfully!");
+});
 
 function showToast(msg) {
   toast.textContent = msg;

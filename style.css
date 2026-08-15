@@ -3,7 +3,7 @@
   --surface-color: #ffffff;
   --card-bg: #ffffff;
   --text-color: #24292f;
-  --subtext-color: #57609a;
+  --subtext-color: #57606a;
   --primary-color: #0969da;
   --primary-hover: #0856b3;
   --border-color: #d0d7de;
@@ -30,6 +30,10 @@
   --tag-text: #58a6ff;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 * {
@@ -84,35 +88,69 @@ body {
 .nav-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* Hero Section */
 .hero-section {
-  padding: 40px 0 24px;
+  padding: 44px 0 28px;
   text-align: center;
 }
 
+.hero-badge {
+  display: inline-block;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
 .hero-container h1 {
-  font-size: 2rem;
-  margin-bottom: 8px;
+  font-size: 2.1rem;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
 }
 
 .hero-container p {
   color: var(--subtext-color);
   font-size: 1rem;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  max-width: 650px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
+.hero-actions {
+  margin-bottom: 28px;
+}
+
+.btn-cta {
+  text-decoration: none;
+  display: inline-block;
+  padding: 11px 22px;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 14px rgba(9, 105, 218, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(9, 105, 218, 0.4);
+}
+
+/* Filter Controls */
 .filter-controls {
   display: flex;
   gap: 12px;
-  max-width: 600px;
+  max-width: 620px;
   margin: 0 auto;
   flex-direction: column;
 }
 
-@media (min-width: 540px) {
+@media (min-width: 560px) {
   .filter-controls {
     flex-direction: row;
   }
@@ -126,6 +164,7 @@ input, select {
   color: var(--text-color);
   font-size: 0.95rem;
   outline: none;
+  transition: border-color 0.2s ease;
 }
 
 input:focus, select:focus {
@@ -149,7 +188,7 @@ input:focus, select:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 20px 0 16px;
+  margin: 24px 0 16px;
 }
 
 .counter-text {
@@ -159,11 +198,11 @@ input:focus, select:focus {
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
   gap: 20px;
 }
 
-/* Card Style */
+/* Event Card Animation & Layout */
 .event-card {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -173,10 +212,24 @@ input:focus, select:focus {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  animation: cardFadeIn 0.35s ease-out forwards;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .event-card:hover {
+  transform: translateY(-3px);
   box-shadow: var(--shadow-md);
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .card-header-row {
@@ -195,8 +248,22 @@ input:focus, select:focus {
   border-radius: 20px;
 }
 
-.event-date-badge {
-  font-size: 0.8rem;
+.seat-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background-color: var(--tag-bg);
+  color: var(--tag-text);
+}
+
+.seat-low {
+  background-color: #ffebe9;
+  color: var(--danger-color);
+}
+
+.sold-out {
+  background-color: var(--border-color);
   color: var(--subtext-color);
 }
 
@@ -233,6 +300,10 @@ input:focus, select:focus {
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .btn-primary {
@@ -266,6 +337,12 @@ input:focus, select:focus {
   cursor: not-allowed;
 }
 
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+
 /* Modals */
 .modal-layer {
   position: fixed;
@@ -289,6 +366,22 @@ input:focus, select:focus {
   max-width: 440px;
   padding: 20px;
   box-shadow: var(--shadow-md);
+  animation: modalScale 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-box-wide {
+  max-width: 580px;
+}
+
+@keyframes modalScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .modal-header {
@@ -317,7 +410,7 @@ input:focus, select:focus {
   font-weight: 500;
 }
 
-.input-field input {
+.input-field input, .input-field select {
   width: 100%;
 }
 
@@ -328,6 +421,16 @@ input:focus, select:focus {
   margin-top: 4px;
 }
 
+.conflict-warning {
+  background-color: #fff3cd;
+  color: #664d03;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+  border: 1px solid #ffecb5;
+}
+
 .submit-btn {
   width: 100%;
   margin-top: 8px;
@@ -335,7 +438,7 @@ input:focus, select:focus {
 
 /* Registered List */
 .registered-list-wrapper {
-  max-height: 300px;
+  max-height: 320px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -346,7 +449,7 @@ input:focus, select:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
+  padding: 10px 14px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
 }
@@ -359,6 +462,13 @@ input:focus, select:focus {
 .reg-row-date {
   font-size: 0.75rem;
   color: var(--subtext-color);
+  margin-bottom: 4px;
+}
+
+.reg-row-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
 }
 
 .btn-remove {
@@ -371,75 +481,7 @@ input:focus, select:focus {
   cursor: pointer;
 }
 
-/* Empty State & Toast */
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: var(--subtext-color);
-}
-
-.toast-popup {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: var(--text-color);
-  color: var(--bg-color);
-  padding: 10px 16px;
-  border-radius: var(--radius);
-  font-size: 0.85rem;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-  z-index: 1000;
-}
-
-.toast-popup.visible {
-  opacity: 1;
-}
-/* Wide Modal */
-.modal-box-wide {
-  max-width: 580px;
-}
-
-/* Seat Progress Bar */
-.seat-badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 12px;
-  background-color: var(--tag-bg);
-  color: var(--tag-text);
-}
-
-.seat-low {
-  background-color: #ffebe9;
-  color: var(--danger-color);
-}
-
-.sold-out {
-  background-color: var(--border-color);
-  color: var(--subtext-color);
-}
-
-/* Action Buttons inside Cards & Passes */
-.card-actions-group {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.reg-row-actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.btn-sm {
-  padding: 4px 8px;
-  font-size: 0.75rem;
-}
-
-/* Ticket Pass Styles */
+/* Ticket Pass & QR */
 .ticket-pass {
   border: 2px dashed var(--border-color);
   border-radius: var(--radius);
@@ -466,9 +508,52 @@ input:focus, select:focus {
   color: var(--text-color);
 }
 
+.ticket-qr-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.qr-box {
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  display: inline-block;
+}
+
 .pass-actions {
   display: flex;
   justify-content: flex-end;
+}
+
+/* Empty State & Toast */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--subtext-color);
+}
+
+.toast-popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+}
+
+.toast-popup.visible {
+  opacity: 1;
 }
 
 /* Print Handling */
