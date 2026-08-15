@@ -234,9 +234,13 @@ function getRemainingSeats(eventId, total) {
   const taken = userRegistrations.filter(r => r.eventId === eventId).length;
   return Math.max(0, total - taken);
 }
-
-// Render Event Cards Grid
 function renderEvents() {
+  const eventsContainer = document.getElementById("events-container");
+  const searchBar = document.getElementById("search-bar");
+  const categorySelect = document.getElementById("category-select");
+  const eventsCount = document.getElementById("events-count");
+  const noEventsMsg = document.getElementById("no-events-msg");
+
   if (!eventsContainer) return;
   const search = searchBar ? searchBar.value.toLowerCase().trim() : "";
   const selectedCat = categorySelect ? categorySelect.value : "All";
@@ -249,9 +253,7 @@ function renderEvents() {
   });
 
   eventsContainer.innerHTML = "";
-  if (eventsCount) {
-    eventsCount.textContent = `Showing ${filtered.length} of ${eventList.length} events`;
-  }
+  if (eventsCount) eventsCount.textContent = `Showing ${filtered.length} of ${eventList.length} events`;
 
   if (filtered.length === 0) {
     if (noEventsMsg) noEventsMsg.style.display = "block";
@@ -259,7 +261,7 @@ function renderEvents() {
   }
   if (noEventsMsg) noEventsMsg.style.display = "none";
 
-  filtered.forEach(evt => {
+  filtered.forEach((evt, index) => {
     const isRegistered = userRegistrations.some(r => r.eventId === evt.id);
     const seatsLeft = getRemainingSeats(evt.id, evt.totalSeats);
     const isSoldOut = seatsLeft === 0;
@@ -269,7 +271,10 @@ function renderEvents() {
     else if (seatsLeft <= 5) seatBadgeClass += " seat-low";
 
     const card = document.createElement("div");
-    card.className = "event-card";
+    card.className = "event-card event-card-animated";
+    // Stagger each card animation by 50 milliseconds
+    card.style.animationDelay = `${index * 0.05}s`;
+
     card.innerHTML = `
       <div>
         <div class="card-header-row">
@@ -285,7 +290,7 @@ function renderEvents() {
           <button 
             class="btn ${isRegistered || isSoldOut ? 'btn-disabled' : 'btn-primary'}" 
             ${isRegistered || isSoldOut ? 'disabled' : ''} 
-            onclick="openRegisterModal('${evt.id}')">
+            onclick="window.openRegisterModal('${evt.id}')">
             ${isRegistered ? 'Registered' : isSoldOut ? 'Full' : 'Register'}
           </button>
         </div>
