@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventHub | Campus Tech Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- top nav -->
+  <header class="navbar">
+    <div class="nav-wrapper">
+      <a href="#" class="brand">Event<span>Hub</span></a>
+      <div class="nav-controls">
+        <button id="view-registered-btn" class="btn btn-secondary">
+          My Registrations (<span id="reg-badge">0</span>)
+        </button>
+        <button id="theme-btn" class="btn btn-icon" title="Toggle theme">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-section">
+    <div class="container hero-container">
+      <h1>Campus Tech Events & Hackathons</h1>
+      <p>Discover workshops, coding competitions, and guest lectures happening this season.</p>
+
+      <div class="filter-controls">
+        <input type="text" id="search-bar" placeholder="Search by name or keyword..." autocomplete="off">
+        <select id="category-select">
+          <option value="All">All Domains</option>
+          <option value="AI/ML">AI / Machine Learning</option>
+          <option value="Web">Web Development</option>
+          <option value="Cybersecurity">Cybersecurity</option>
+          <option value="Competitive Programming">CP & DSA</option>
+          <option value="Robotics">Robotics & IoT</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <main class="container main-content">
+    <div class="section-title-row">
+      <h2>Available Events</h2>
+      <span id="events-count" class="counter-text">Loading events...</span>
+    </div>
+
+    <!-- events get injected here by script.js -->
+    <div id="events-container" class="cards-grid"></div>
+
+    <div id="no-events-msg" class="empty-state" style="display:none;">
+      <p>No events found matching your search criteria.</p>
+    </div>
+  </main>
+
+  <!-- registration modal -->
+  <div id="modal-backdrop" class="modal-layer" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-title">Event Registration</h3>
+        <button id="close-modal-btn" class="close-x">&times;</button>
+      </div>
+
+      <form id="reg-form" novalidate>
+        <input type="hidden" id="form-event-id">
+
+        <div class="input-field">
+          <label for="user-name">Full Name</label>
+          <input type="text" id="user-name" placeholder="Enter your full name">
+          <small class="error-text" id="name-err"></small>
+        </div>
+
+        <div class="input-field">
+          <label for="user-email">Email Address</label>
+          <input type="email" id="user-email" placeholder="rollno@institute.ac.in">
+          <small class="error-text" id="email-err"></small>
+        </div>
+
+        <div class="input-field">
+          <label for="user-college">College / Institute</label>
+          <input type="text" id="user-college" placeholder="Institute name">
+          <small class="error-text" id="college-err"></small>
+        </div>
+
+        <button type="submit" class="btn btn-primary submit-btn">Confirm Registration</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- "my registrations" drawer -->
+  <div id="registered-backdrop" class="modal-layer" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>My Registered Events</h3>
+        <button id="close-reg-modal-btn" class="close-x">&times;</button>
+      </div>
+      <div id="registered-list" class="registered-list-wrapper"></div>
+    </div>
+  </div>
+
+  <div id="toast-message" class="toast-popup"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
