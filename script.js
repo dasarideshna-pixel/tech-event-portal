@@ -562,49 +562,7 @@ function updateBadge() {
   if (regBadge) regBadge.textContent = userRegistrations.length;
 }
 
-// Client-side CSV Exporter
-const exportBtn = document.getElementById("export-csv-btn");
-if (exportBtn) {
-  exportBtn.addEventListener("click", () => {
-    if (userRegistrations.length === 0) {
-      showToast("No registrations found to export.");
-      return;
-    }
 
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Pass ID,Event Name,Date,Venue,Attendee Name,Email,College,Issued Date\r\n";
-
-    userRegistrations.forEach(r => {
-      const evt = eventList.find(e => e.id === r.eventId);
-      const eventName = evt ? `"${evt.title.replace(/"/g, '""')}"` : "N/A";
-      const eventDate = evt ? evt.date : "N/A";
-      const eventVenue = evt ? `"${evt.venue.replace(/"/g, '""')}"` : "N/A";
-
-      const row = [
-        r.passId,
-        eventName,
-        eventDate,
-        eventVenue,
-        `"${r.name}"`,
-        `"${r.email}"`,
-        `"${r.college}"`,
-        r.registeredOn || new Date().toLocaleDateString()
-      ].join(",");
-
-      csvContent += row + "\r\n";
-    });
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `event_attendees_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showToast("Attendee roster exported successfully!");
-  });
-}
 
 function showToast(msg) {
   if (!toast) return;
