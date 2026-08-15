@@ -94,12 +94,20 @@ window.addEventListener("DOMContentLoaded", () => {
   updateBadge();
 });
 
-// Theme Management
+// --- Updated Theme Mode Management ---
 function setupTheme() {
   const currentTheme = localStorage.getItem("app_theme") || "light";
   document.documentElement.setAttribute("data-theme", currentTheme);
-  themeBtn.textContent = currentTheme === "dark" ? "☀️" : "🌙";
+  themeBtn.textContent = currentTheme === "dark" ? "☀️ Mode" : "🌙 Mode";
 }
+
+themeBtn.addEventListener("click", () => {
+  const active = document.documentElement.getAttribute("data-theme");
+  const target = active === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", target);
+  localStorage.setItem("app_theme", target);
+  themeBtn.textContent = target === "dark" ? "☀️ Mode" : "🌙 Mode";
+});
 
 themeBtn.addEventListener("click", () => {
   const active = document.documentElement.getAttribute("data-theme");
@@ -498,27 +506,53 @@ const notificationsData = [
   }
 ];
 
-// --- Winnings & Achievements Data ---
-const winningsData = [
+// --- Certifications & Performance Data ---
+const certificationsData = [
   {
     icon: "🥇",
-    title: "1st Place Winner",
-    event: "Web3 Scalability Sprint 2026",
-    prize: "₹25,000 + Certificate of Merit"
+    title: "1st Place - Web3 Scalability Sprint",
+    authority: "Issued by CodeForge 2026",
+    id: "CERT-WF-9942",
+    date: "August 2026"
   },
   {
     icon: "🥈",
-    title: "Runner Up",
-    event: "Autonomous Drone Robotics Expo",
-    prize: "₹10,000 + Tech Trophy"
+    title: "Runner Up - Autonomous Robotics Expo",
+    authority: "Issued by TechSymposium",
+    id: "CERT-RB-4011",
+    date: "July 2026"
   },
   {
-    icon: "🏅",
-    title: "Top 5 Finalist",
-    event: "Algorithmic Speed Coding Cup",
-    prize: "Special Commendation Badge"
+    icon: "📜",
+    title: "Certificate of Merit - DSA Speed Contest",
+    authority: "Issued by Algorithmics Society",
+    id: "CERT-DS-1088",
+    date: "June 2026"
   }
 ];
+
+// --- Render Performance Dashboard Subsections ---
+const certGrid = document.getElementById("certifications-grid");
+
+winningsBtn.addEventListener("click", () => {
+  certGrid.innerHTML = "";
+
+  certificationsData.forEach(c => {
+    const card = document.createElement("div");
+    card.className = "certificate-card";
+    card.innerHTML = `
+      <div class="cert-icon">${c.icon}</div>
+      <div class="cert-meta">
+        <strong>${c.title}</strong>
+        <span>${c.authority} • ${c.date}</span>
+        <div class="cert-badge">${c.id}</div>
+      </div>
+    `;
+    certGrid.appendChild(card);
+  });
+
+  winningsBackdrop.style.display = "flex";
+});
 
 // --- Modal Handlers for Notifications & Winnings ---
 const notifBtn = document.getElementById("notif-btn");

@@ -8,13 +8,13 @@
 </head>
 <body>
 
-  <!-- Top Navigation Bar -->
+ <!-- Top Navigation Bar -->
   <header class="navbar">
     <div class="nav-wrapper">
       <a href="#" class="brand">Event<span>Hub</span></a>
       <div class="nav-controls">
-        <button id="view-winnings-btn" class="btn btn-secondary" title="View Competition Progress & Winnings">
-          🏆 My Winnings & Rounds
+        <button id="view-winnings-btn" class="btn btn-secondary" title="View Progress & Certifications">
+          📊 Performance Dashboard
         </button>
         <button id="view-registered-btn" class="btn btn-secondary">
           My Passes (<span id="reg-badge">0</span>)
@@ -25,7 +25,7 @@
         <button id="export-csv-btn" class="btn btn-secondary" title="Export attendee roster">
           📊 Export CSV
         </button>
-        <button id="theme-btn" class="btn btn-icon" title="Toggle theme">🌙</button>
+        <button id="theme-btn" class="btn btn-secondary" title="Toggle Mode">🌙 Mode</button>
       </div>
     </div>
   </header>
@@ -145,34 +145,43 @@
     </div>
   </div>
 
-  <!-- Rounds Tracker & Winnings Vault Modal -->
+ <!-- Performance Dashboard Modal -->
   <div id="winnings-backdrop" class="modal-layer" style="display: none;">
     <div class="modal-box modal-box-wide">
       <div class="modal-header">
-        <h3>🏆 Participant Career & Winnings Hub</h3>
+        <h3>📊 Performance Dashboard</h3>
         <button id="close-winnings-btn" class="close-x">&times;</button>
       </div>
-      
-      <!-- Stepper -->
-      <div class="progress-section">
-        <div class="progress-header">
-          <span><strong>Hackathon Progression:</strong> Round 3 of 4</span>
-          <span class="status-chip chip-active">In Progress</span>
+
+      <!-- Subsection 1: Round Progress -->
+      <div class="dashboard-subsection">
+        <div class="subsection-header">
+          <h4>🎯 Round Progress</h4>
+          <span class="status-chip chip-active">Round 3 of 4 (In Progress)</span>
         </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" style="width: 75%;"></div>
-        </div>
-        <div class="rounds-stepper">
-          <div class="step completed"><span>✓</span><small>Round 1: Idea Submission</small></div>
-          <div class="step completed"><span>✓</span><small>Round 2: Prototype Demo</small></div>
-          <div class="step active"><span>3</span><small>Round 3: Code Evaluation</small></div>
-          <div class="step"><span>4</span><small>Round 4: Grand Finale Pitch</small></div>
+        <div class="progress-section">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: 75%;"></div>
+          </div>
+          <div class="rounds-stepper">
+            <div class="step completed"><span>✓</span><small>Round 1: Idea Submission</small></div>
+            <div class="step completed"><span>✓</span><small>Round 2: Prototype Demo</small></div>
+            <div class="step active"><span>3</span><small>Round 3: Code Evaluation</small></div>
+            <div class="step"><span>4</span><small>Round 4: Grand Finale Pitch</small></div>
+          </div>
         </div>
       </div>
 
-      <!-- Winnings Grid -->
-      <h4 class="subheading-vault">🎖️ Hall of Fame & Badges</h4>
-      <div id="winnings-grid" class="trophy-grid"></div>
+      <!-- Subsection 2: Certifications & Winnings -->
+      <div class="dashboard-subsection">
+        <div class="subsection-header">
+          <h4>📜 Certifications & Achievements</h4>
+          <span class="counter-text">3 Verified Records</span>
+        </div>
+        <div id="certifications-grid" class="trophy-grid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
     </div>
   </div>
 

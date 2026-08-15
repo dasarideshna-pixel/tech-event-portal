@@ -744,4 +744,69 @@ input:focus, select:focus {
 .trophy-card span {
   font-size: 0.75rem;
   color: var(--subtext-color);
+}/* Performance Dashboard Subsections */
+.dashboard-subsection {
+  margin-bottom: 22px;
+}
+
+.dashboard-subsection:last-child {
+  margin-bottom: 0;
+}
+
+.subsection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.subsection-header h4 {
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
+.certificate-card {
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.certificate-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
+}
+
+.cert-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.cert-meta strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-color);
+}
+
+.cert-meta span {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--subtext-color);
+}
+
+.cert-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  color: var(--primary-color);
+  background: var(--tag-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  font-weight: 600;
 }
