@@ -62,6 +62,56 @@ const eventList = [
   }
 ];
 
+// Certifications Data
+const certificationsData = [
+  {
+    icon: "🥇",
+    title: "1st Place - Web3 Scalability Sprint",
+    authority: "Issued by CodeForge 2026",
+    id: "CERT-WF-9942",
+    date: "August 2026"
+  },
+  {
+    icon: "🥈",
+    title: "Runner Up - Autonomous Robotics Expo",
+    authority: "Issued by TechSymposium",
+    id: "CERT-RB-4011",
+    date: "July 2026"
+  },
+  {
+    icon: "📜",
+    title: "Certificate of Merit - DSA Speed Contest",
+    authority: "Issued by Algorithmics Society",
+    id: "CERT-DS-1088",
+    date: "June 2026"
+  }
+];
+
+// Notifications Data
+const notificationsData = [
+  {
+    id: 1,
+    title: "Round 2 Results Published",
+    time: "10 mins ago",
+    desc: "Shortlisted for Round 3 Code Evaluation in IITB GenAI Hackathon.",
+    unread: true
+  },
+  {
+    id: 2,
+    title: "Workshop Venue Updated",
+    time: "2 hours ago",
+    desc: "The Neural Networks workshop shifted to Room 204.",
+    unread: true
+  },
+  {
+    id: 3,
+    title: "Cyber CTF Credentials Issued",
+    time: "Yesterday",
+    desc: "Your VPN keys and test environment access are active.",
+    unread: false
+  }
+];
+
 // Persistent State from LocalStorage
 let userRegistrations = JSON.parse(localStorage.getItem("event_registrations")) || [];
 
@@ -83,7 +133,19 @@ const modalTitle = document.getElementById("modal-title");
 const eventSelectField = document.getElementById("event-select-field");
 const registeredList = document.getElementById("registered-list");
 
-// Theme & Notifications
+// Dashboard & Notif Modals
+const winningsBtn = document.getElementById("view-winnings-btn");
+const winningsBackdrop = document.getElementById("winnings-backdrop");
+const certGrid = document.getElementById("certifications-grid");
+const closeWinningsBtn = document.getElementById("close-winnings-btn");
+
+const notifBtn = document.getElementById("notif-btn");
+const notifBackdrop = document.getElementById("notif-backdrop");
+const notifList = document.getElementById("notif-list");
+const notifBadge = document.getElementById("notif-badge");
+const closeNotifBtn = document.getElementById("close-notif-btn");
+
+// Theme & Toast
 const themeBtn = document.getElementById("theme-btn");
 const toast = document.getElementById("toast-message");
 
@@ -94,28 +156,78 @@ window.addEventListener("DOMContentLoaded", () => {
   updateBadge();
 });
 
-// --- Updated Theme Mode Management ---
+// Theme Management
 function setupTheme() {
   const currentTheme = localStorage.getItem("app_theme") || "light";
   document.documentElement.setAttribute("data-theme", currentTheme);
-  themeBtn.textContent = currentTheme === "dark" ? "☀️ Mode" : "🌙 Mode";
+  if (themeBtn) {
+    themeBtn.textContent = currentTheme === "dark" ? "☀️ Mode" : "🌙 Mode";
+  }
 }
 
-themeBtn.addEventListener("click", () => {
-  const active = document.documentElement.getAttribute("data-theme");
-  const target = active === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", target);
-  localStorage.setItem("app_theme", target);
-  themeBtn.textContent = target === "dark" ? "☀️ Mode" : "🌙 Mode";
-});
+if (themeBtn) {
+  themeBtn.addEventListener("click", () => {
+    const active = document.documentElement.getAttribute("data-theme");
+    const target = active === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", target);
+    localStorage.setItem("app_theme", target);
+    themeBtn.textContent = target === "dark" ? "☀️ Mode" : "🌙 Mode";
+  });
+}
 
-themeBtn.addEventListener("click", () => {
-  const active = document.documentElement.getAttribute("data-theme");
-  const target = active === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", target);
-  localStorage.setItem("app_theme", target);
-  themeBtn.textContent = target === "dark" ? "☀️" : "🌙";
-});
+// Performance Dashboard
+if (winningsBtn && winningsBackdrop) {
+  winningsBtn.addEventListener("click", () => {
+    if (certGrid) {
+      certGrid.innerHTML = "";
+      certificationsData.forEach(c => {
+        const card = document.createElement("div");
+        card.className = "certificate-card";
+        card.innerHTML = `
+          <div class="cert-icon">${c.icon}</div>
+          <div class="cert-meta">
+            <strong>${c.title}</strong>
+            <span>${c.authority} • ${c.date}</span>
+            <div class="cert-badge">${c.id}</div>
+          </div>
+        `;
+        certGrid.appendChild(card);
+      });
+    }
+    winningsBackdrop.style.display = "flex";
+  });
+}
+
+if (closeWinningsBtn) {
+  closeWinningsBtn.addEventListener("click", () => winningsBackdrop.style.display = "none");
+}
+
+// Notifications
+if (notifBtn && notifBackdrop) {
+  notifBtn.addEventListener("click", () => {
+    if (notifList) {
+      notifList.innerHTML = "";
+      notificationsData.forEach(n => {
+        const card = document.createElement("div");
+        card.className = `notif-card ${n.unread ? 'unread' : ''}`;
+        card.innerHTML = `
+          <div class="notif-title-row">
+            <span>${n.title}</span>
+            <span class="notif-time">${n.time}</span>
+          </div>
+          <p>${n.desc}</p>
+        `;
+        notifList.appendChild(card);
+      });
+    }
+    if (notifBadge) notifBadge.style.display = "none";
+    notifBackdrop.style.display = "flex";
+  });
+}
+
+if (closeNotifBtn) {
+  closeNotifBtn.addEventListener("click", () => notifBackdrop.style.display = "none");
+}
 
 // Capacity Calculation
 function getRemainingSeats(eventId, total) {
@@ -125,8 +237,9 @@ function getRemainingSeats(eventId, total) {
 
 // Render Event Cards Grid
 function renderEvents() {
-  const search = searchBar.value.toLowerCase().trim();
-  const selectedCat = categorySelect.value;
+  if (!eventsContainer) return;
+  const search = searchBar ? searchBar.value.toLowerCase().trim() : "";
+  const selectedCat = categorySelect ? categorySelect.value : "All";
 
   const filtered = eventList.filter(item => {
     const matchQuery = item.title.toLowerCase().includes(search) || 
@@ -136,13 +249,15 @@ function renderEvents() {
   });
 
   eventsContainer.innerHTML = "";
-  eventsCount.textContent = `Showing ${filtered.length} of ${eventList.length} events`;
+  if (eventsCount) {
+    eventsCount.textContent = `Showing ${filtered.length} of ${eventList.length} events`;
+  }
 
   if (filtered.length === 0) {
-    noEventsMsg.style.display = "block";
+    if (noEventsMsg) noEventsMsg.style.display = "block";
     return;
   }
-  noEventsMsg.style.display = "none";
+  if (noEventsMsg) noEventsMsg.style.display = "none";
 
   filtered.forEach(evt => {
     const isRegistered = userRegistrations.some(r => r.eventId === evt.id);
@@ -180,9 +295,8 @@ function renderEvents() {
   });
 }
 
-// Search and Filter Listeners
-searchBar.addEventListener("input", renderEvents);
-categorySelect.addEventListener("change", renderEvents);
+if (searchBar) searchBar.addEventListener("input", renderEvents);
+if (categorySelect) categorySelect.addEventListener("change", renderEvents);
 
 // Schedule Conflict Checker
 function checkScheduleConflict(targetEventId) {
@@ -203,6 +317,7 @@ function checkScheduleConflict(targetEventId) {
 
 // Modal Handlers
 function populateEventDropdown(selectedId) {
+  if (!eventSelectField) return;
   eventSelectField.innerHTML = "";
   eventList.forEach(evt => {
     const opt = document.createElement("option");
@@ -213,22 +328,21 @@ function populateEventDropdown(selectedId) {
   });
 }
 
-function openRegisterModal(id) {
+window.openRegisterModal = function(id) {
   populateEventDropdown(id);
   const targetEvent = eventList.find(e => e.id === id);
   if (!targetEvent) return;
 
-  modalTitle.textContent = `Register: ${targetEvent.title}`;
+  if (modalTitle) modalTitle.textContent = `Register: ${targetEvent.title}`;
   clearErrors();
-  regForm.reset();
+  if (regForm) regForm.reset();
   populateEventDropdown(id);
 
-  // Evaluate conflict warning
   const conflict = checkScheduleConflict(id);
   const existingWarning = document.getElementById("conflict-alert");
   if (existingWarning) existingWarning.remove();
 
-  if (conflict) {
+  if (conflict && regForm) {
     const warningDiv = document.createElement("div");
     warningDiv.id = "conflict-alert";
     warningDiv.className = "conflict-warning";
@@ -236,84 +350,93 @@ function openRegisterModal(id) {
     regForm.prepend(warningDiv);
   }
 
-  modalBackdrop.style.display = "flex";
+  if (modalBackdrop) modalBackdrop.style.display = "flex";
+};
+
+if (eventSelectField) {
+  eventSelectField.addEventListener("change", (e) => {
+    const newId = e.target.value;
+    const conflict = checkScheduleConflict(newId);
+    const existingWarning = document.getElementById("conflict-alert");
+    if (existingWarning) existingWarning.remove();
+
+    if (conflict && regForm) {
+      const warningDiv = document.createElement("div");
+      warningDiv.id = "conflict-alert";
+      warningDiv.className = "conflict-warning";
+      warningDiv.innerHTML = `⚠️ <strong>Time Slot Warning:</strong> You already hold a pass for <em>"${conflict}"</em> on this date.`;
+      regForm.prepend(warningDiv);
+    }
+  });
 }
 
-// Listen to dropdown changes inside modal to update conflict warning dynamically
-eventSelectField.addEventListener("change", (e) => {
-  const newId = e.target.value;
-  const conflict = checkScheduleConflict(newId);
-  const existingWarning = document.getElementById("conflict-alert");
-  if (existingWarning) existingWarning.remove();
+// Close Buttons
+const closeModBtn = document.getElementById("close-modal-btn");
+const closeRegBtn = document.getElementById("close-reg-modal-btn");
+const closePassBtn = document.getElementById("close-pass-btn");
 
-  if (conflict) {
-    const warningDiv = document.createElement("div");
-    warningDiv.id = "conflict-alert";
-    warningDiv.className = "conflict-warning";
-    warningDiv.innerHTML = `⚠️ <strong>Time Slot Warning:</strong> You already hold a pass for <em>"${conflict}"</em> on this date.`;
-    regForm.prepend(warningDiv);
-  }
-});
-
-document.getElementById("close-modal-btn").addEventListener("click", () => modalBackdrop.style.display = "none");
-document.getElementById("close-reg-modal-btn").addEventListener("click", () => registeredBackdrop.style.display = "none");
-document.getElementById("close-pass-btn").addEventListener("click", () => passBackdrop.style.display = "none");
+if (closeModBtn) closeModBtn.addEventListener("click", () => modalBackdrop.style.display = "none");
+if (closeRegBtn) closeRegBtn.addEventListener("click", () => registeredBackdrop.style.display = "none");
+if (closePassBtn) closePassBtn.addEventListener("click", () => passBackdrop.style.display = "none");
 
 window.addEventListener("click", (e) => {
   if (e.target === modalBackdrop) modalBackdrop.style.display = "none";
   if (e.target === registeredBackdrop) registeredBackdrop.style.display = "none";
   if (e.target === passBackdrop) passBackdrop.style.display = "none";
+  if (e.target === winningsBackdrop) winningsBackdrop.style.display = "none";
+  if (e.target === notifBackdrop) notifBackdrop.style.display = "none";
 });
 
 // Form Validation & Submission
-regForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  clearErrors();
+if (regForm) {
+  regForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    clearErrors();
 
-  const nameInput = document.getElementById("user-name").value.trim();
-  const emailInput = document.getElementById("user-email").value.trim();
-  const collegeInput = document.getElementById("user-college").value.trim();
-  const eventId = eventSelectField.value;
+    const nameInput = document.getElementById("user-name").value.trim();
+    const emailInput = document.getElementById("user-email").value.trim();
+    const collegeInput = document.getElementById("user-college").value.trim();
+    const eventId = eventSelectField ? eventSelectField.value : eventList[0].id;
 
-  let isValid = true;
+    let isValid = true;
 
-  if (nameInput.length < 3) {
-    document.getElementById("name-err").textContent = "Name must be at least 3 characters.";
-    isValid = false;
-  }
+    if (nameInput.length < 3) {
+      document.getElementById("name-err").textContent = "Name must be at least 3 characters.";
+      isValid = false;
+    }
 
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(emailInput)) {
-    document.getElementById("email-err").textContent = "Enter a valid email address.";
-    isValid = false;
-  }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(emailInput)) {
+      document.getElementById("email-err").textContent = "Enter a valid email address.";
+      isValid = false;
+    }
 
-  if (collegeInput.length < 2) {
-    document.getElementById("college-err").textContent = "College name is required.";
-    isValid = false;
-  }
+    if (collegeInput.length < 2) {
+      document.getElementById("college-err").textContent = "College name is required.";
+      isValid = false;
+    }
 
-  if (!isValid) return;
+    if (!isValid) return;
 
-  // Generate a random ticket pass identifier
-  const passId = "NX-" + Math.floor(100000 + Math.random() * 900000);
+    const passId = "NX-" + Math.floor(100000 + Math.random() * 900000);
 
-  userRegistrations.push({
-    passId: passId,
-    eventId: eventId,
-    name: nameInput,
-    email: emailInput,
-    college: collegeInput,
-    registeredOn: new Date().toLocaleDateString()
+    userRegistrations.push({
+      passId: passId,
+      eventId: eventId,
+      name: nameInput,
+      email: emailInput,
+      college: collegeInput,
+      registeredOn: new Date().toLocaleDateString()
+    });
+
+    localStorage.setItem("event_registrations", JSON.stringify(userRegistrations));
+
+    if (modalBackdrop) modalBackdrop.style.display = "none";
+    showToast("Registration confirmed! Digital pass generated.");
+    updateBadge();
+    renderEvents();
   });
-
-  localStorage.setItem("event_registrations", JSON.stringify(userRegistrations));
-
-  modalBackdrop.style.display = "none";
-  showToast("Registration confirmed! Digital pass generated.");
-  updateBadge();
-  renderEvents();
-});
+}
 
 function clearErrors() {
   document.querySelectorAll(".error-text").forEach(el => el.textContent = "");
@@ -366,253 +489,128 @@ window.viewDigitalPass = function(passId) {
   const evt = eventList.find(e => e.id === reg.eventId);
   if (!evt) return;
 
-  passContent.innerHTML = `
-    <div class="ticket-header">
-      <h4>${evt.title}</h4>
-      <div class="ticket-id">Pass ID: ${reg.passId}</div>
-    </div>
-    <div class="ticket-details">
-      <p><strong>Attendee:</strong> ${reg.name}</p>
-      <p><strong>Email:</strong> ${reg.email}</p>
-      <p><strong>Institute:</strong> ${reg.college}</p>
-      <p><strong>Date & Venue:</strong> ${evt.date} | ${evt.venue}</p>
-      <p><strong>Issued On:</strong> ${reg.registeredOn}</p>
-    </div>
-    <div class="ticket-qr-section">
-      ${generatePassQR(reg.passId)}
-    </div>
-  `;
+  if (passContent) {
+    passContent.innerHTML = `
+      <div class="ticket-header">
+        <h4>${evt.title}</h4>
+        <div class="ticket-id">Pass ID: ${reg.passId}</div>
+      </div>
+      <div class="ticket-details">
+        <p><strong>Attendee:</strong> ${reg.name}</p>
+        <p><strong>Email:</strong> ${reg.email}</p>
+        <p><strong>Institute:</strong> ${reg.college}</p>
+        <p><strong>Date & Venue:</strong> ${evt.date} | ${evt.venue}</p>
+        <p><strong>Issued On:</strong> ${reg.registeredOn}</p>
+      </div>
+      <div class="ticket-qr-section">
+        ${generatePassQR(reg.passId)}
+      </div>
+    `;
+  }
 
-  registeredBackdrop.style.display = "none";
-  passBackdrop.style.display = "flex";
+  if (registeredBackdrop) registeredBackdrop.style.display = "none";
+  if (passBackdrop) passBackdrop.style.display = "flex";
 };
 
 // "My Passes" View
-document.getElementById("view-registered-btn").addEventListener("click", () => {
-  registeredList.innerHTML = "";
+const viewRegBtn = document.getElementById("view-registered-btn");
+if (viewRegBtn) {
+  viewRegBtn.addEventListener("click", () => {
+    if (!registeredList) return;
+    registeredList.innerHTML = "";
 
-  if (userRegistrations.length === 0) {
-    registeredList.innerHTML = "<p class='empty-state'>You have not registered for any events yet.</p>";
-  } else {
-    userRegistrations.forEach(item => {
-      const match = eventList.find(e => e.id === item.eventId);
-      if (!match) return;
+    if (userRegistrations.length === 0) {
+      registeredList.innerHTML = "<p class='empty-state'>You have not registered for any events yet.</p>";
+    } else {
+      userRegistrations.forEach(item => {
+        const match = eventList.find(e => e.id === item.eventId);
+        if (!match) return;
 
-      const calUrl = getGoogleCalendarUrl(match);
+        const calUrl = getGoogleCalendarUrl(match);
 
-      const row = document.createElement("div");
-      row.className = "reg-row";
-      row.innerHTML = `
-        <div>
-          <div class="reg-row-title">${match.title}</div>
-          <div class="reg-row-date">Pass: ${item.passId} | Date: ${match.date}</div>
-          <div class="reg-row-actions">
-            <button class="btn btn-secondary btn-sm" onclick="viewDigitalPass('${item.passId}')">🎫 View Pass</button>
-            <a class="btn btn-secondary btn-sm" href="${calUrl}" target="_blank" rel="noopener noreferrer">📅 Add to Cal</a>
-            <button class="btn-remove btn-sm" onclick="cancelRegistration('${item.passId}')">Cancel</button>
+        const row = document.createElement("div");
+        row.className = "reg-row";
+        row.innerHTML = `
+          <div>
+            <div class="reg-row-title">${match.title}</div>
+            <div class="reg-row-date">Pass: ${item.passId} | Date: ${match.date}</div>
+            <div class="reg-row-actions">
+              <button class="btn btn-secondary btn-sm" onclick="viewDigitalPass('${item.passId}')">🎫 View Pass</button>
+              <a class="btn btn-secondary btn-sm" href="${calUrl}" target="_blank" rel="noopener noreferrer">📅 Add to Cal</a>
+              <button class="btn-remove btn-sm" onclick="cancelRegistration('${item.passId}')">Cancel</button>
+            </div>
           </div>
-        </div>
-      `;
-      registeredList.appendChild(row);
-    });
-  }
+        `;
+        registeredList.appendChild(row);
+      });
+    }
 
-  registeredBackdrop.style.display = "flex";
-});
+    if (registeredBackdrop) registeredBackdrop.style.display = "flex";
+  });
+}
 
-function cancelRegistration(passId) {
+window.cancelRegistration = function(passId) {
   userRegistrations = userRegistrations.filter(r => r.passId !== passId);
   localStorage.setItem("event_registrations", JSON.stringify(userRegistrations));
   updateBadge();
   renderEvents();
-  document.getElementById("view-registered-btn").click();
+  if (viewRegBtn) viewRegBtn.click();
   showToast("Registration pass cancelled.");
-}
+};
 
 function updateBadge() {
-  regBadge.textContent = userRegistrations.length;
+  if (regBadge) regBadge.textContent = userRegistrations.length;
 }
 
 // Client-side CSV Exporter
-document.getElementById("export-csv-btn").addEventListener("click", () => {
-  if (userRegistrations.length === 0) {
-    showToast("No registrations found to export.");
-    return;
-  }
+const exportBtn = document.getElementById("export-csv-btn");
+if (exportBtn) {
+  exportBtn.addEventListener("click", () => {
+    if (userRegistrations.length === 0) {
+      showToast("No registrations found to export.");
+      return;
+    }
 
-  let csvContent = "data:text/csv;charset=utf-8,";
-  csvContent += "Pass ID,Event Name,Date,Venue,Attendee Name,Email,College,Issued Date\r\n";
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Pass ID,Event Name,Date,Venue,Attendee Name,Email,College,Issued Date\r\n";
 
-  userRegistrations.forEach(r => {
-    const evt = eventList.find(e => e.id === r.eventId);
-    const eventName = evt ? `"${evt.title.replace(/"/g, '""')}"` : "N/A";
-    const eventDate = evt ? evt.date : "N/A";
-    const eventVenue = evt ? `"${evt.venue.replace(/"/g, '""')}"` : "N/A";
+    userRegistrations.forEach(r => {
+      const evt = eventList.find(e => e.id === r.eventId);
+      const eventName = evt ? `"${evt.title.replace(/"/g, '""')}"` : "N/A";
+      const eventDate = evt ? evt.date : "N/A";
+      const eventVenue = evt ? `"${evt.venue.replace(/"/g, '""')}"` : "N/A";
 
-    const row = [
-      r.passId,
-      eventName,
-      eventDate,
-      eventVenue,
-      `"${r.name}"`,
-      `"${r.email}"`,
-      `"${r.college}"`,
-      r.registeredOn || new Date().toLocaleDateString()
-    ].join(",");
+      const row = [
+        r.passId,
+        eventName,
+        eventDate,
+        eventVenue,
+        `"${r.name}"`,
+        `"${r.email}"`,
+        `"${r.college}"`,
+        r.registeredOn || new Date().toLocaleDateString()
+      ].join(",");
 
-    csvContent += row + "\r\n";
+      csvContent += row + "\r\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `event_attendees_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast("Attendee roster exported successfully!");
   });
-
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `event_attendees_${Date.now()}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  showToast("Attendee roster exported successfully!");
-});
+}
 
 function showToast(msg) {
+  if (!toast) return;
   toast.textContent = msg;
   toast.classList.add("visible");
   setTimeout(() => {
     toast.classList.remove("visible");
   }, 3000);
 }
-// --- Notifications & Announcements State ---
-const notificationsData = [
-  {
-    id: 1,
-    title: "Round 2 Results Published",
-    time: "10 mins ago",
-    desc: "Shortlisted for Round 3 Code Evaluation in IITB GenAI Hackathon.",
-    unread: true
-  },
-  {
-    id: 2,
-    title: "Workshop Venue Updated",
-    time: "2 hours ago",
-    desc: "The Neural Networks workshop shifted to Room 204.",
-    unread: true
-  },
-  {
-    id: 3,
-    title: "Cyber CTF Credentials Issued",
-    time: "Yesterday",
-    desc: "Your VPN keys and test environment access are active.",
-    unread: false
-  }
-];
-
-// --- Certifications & Performance Data ---
-const certificationsData = [
-  {
-    icon: "🥇",
-    title: "1st Place - Web3 Scalability Sprint",
-    authority: "Issued by CodeForge 2026",
-    id: "CERT-WF-9942",
-    date: "August 2026"
-  },
-  {
-    icon: "🥈",
-    title: "Runner Up - Autonomous Robotics Expo",
-    authority: "Issued by TechSymposium",
-    id: "CERT-RB-4011",
-    date: "July 2026"
-  },
-  {
-    icon: "📜",
-    title: "Certificate of Merit - DSA Speed Contest",
-    authority: "Issued by Algorithmics Society",
-    id: "CERT-DS-1088",
-    date: "June 2026"
-  }
-];
-
-// --- Render Performance Dashboard Subsections ---
-const certGrid = document.getElementById("certifications-grid");
-
-winningsBtn.addEventListener("click", () => {
-  certGrid.innerHTML = "";
-
-  certificationsData.forEach(c => {
-    const card = document.createElement("div");
-    card.className = "certificate-card";
-    card.innerHTML = `
-      <div class="cert-icon">${c.icon}</div>
-      <div class="cert-meta">
-        <strong>${c.title}</strong>
-        <span>${c.authority} • ${c.date}</span>
-        <div class="cert-badge">${c.id}</div>
-      </div>
-    `;
-    certGrid.appendChild(card);
-  });
-
-  winningsBackdrop.style.display = "flex";
-});
-
-// --- Modal Handlers for Notifications & Winnings ---
-const notifBtn = document.getElementById("notif-btn");
-const notifBackdrop = document.getElementById("notif-backdrop");
-const notifList = document.getElementById("notif-list");
-const notifBadge = document.getElementById("notif-badge");
-const closeNotifBtn = document.getElementById("close-notif-btn");
-
-const winningsBtn = document.getElementById("view-winnings-btn");
-const winningsBackdrop = document.getElementById("winnings-backdrop");
-const winningsGrid = document.getElementById("winnings-grid");
-const closeWinningsBtn = document.getElementById("close-winnings-btn");
-
-// Render Notifications
-notifBtn.addEventListener("click", () => {
-  notifList.innerHTML = "";
-  notificationsData.forEach(n => {
-    const card = document.createElement("div");
-    card.className = `notif-card ${n.unread ? 'unread' : ''}`;
-    card.innerHTML = `
-      <div class="notif-title-row">
-        <span>${n.title}</span>
-        <span class="notif-time">${n.time}</span>
-      </div>
-      <p>${n.desc}</p>
-    `;
-    notifList.appendChild(card);
-  });
-  
-  // Clear badge upon opening
-  notifBadge.style.display = "none";
-  notifBackdrop.style.display = "flex";
-});
-
-closeNotifBtn.addEventListener("click", () => notifBackdrop.style.display = "none");
-
-// Render Winnings & Progress
-winningsBtn.addEventListener("click", () => {
-  winningsGrid.innerHTML = "";
-  winningsData.forEach(w => {
-    const card = document.createElement("div");
-    card.className = "trophy-card";
-    card.innerHTML = `
-      <div class="trophy-icon">${w.icon}</div>
-      <div>
-        <strong>${w.title}</strong>
-        <span>${w.event}</span>
-        <div style="font-size:0.7rem; color:var(--primary-color); margin-top:2px;">${w.prize}</div>
-      </div>
-    `;
-    winningsGrid.appendChild(card);
-  });
-
-  winningsBackdrop.style.display = "flex";
-});
-
-closeWinningsBtn.addEventListener("click", () => winningsBackdrop.style.display = "none");
-
-// Click outside to close
-window.addEventListener("click", (e) => {
-  if (e.target === notifBackdrop) notifBackdrop.style.display = "none";
-  if (e.target === winningsBackdrop) winningsBackdrop.style.display = "none";
-});

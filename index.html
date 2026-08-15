@@ -8,7 +8,7 @@
 </head>
 <body>
 
- <!-- Top Navigation Bar -->
+  <!-- Navigation Bar -->
   <header class="navbar">
     <div class="nav-wrapper">
       <a href="#" class="brand">Event<span>Hub</span></a>
@@ -41,7 +41,7 @@
         <a href="#events-section" class="btn btn-primary btn-cta">🚀 Explore All Events</a>
       </div>
 
-      <!-- Real-time Search & Filter Controls -->
+      <!-- Real-time Search & Category Filters -->
       <div class="filter-controls" id="events-section">
         <input type="text" id="search-bar" placeholder="Search by event title or keyword..." autocomplete="off">
         <select id="category-select">
@@ -56,7 +56,7 @@
     </div>
   </section>
 
-  <!-- Events Listing Grid -->
+  <!-- Event Listing Section -->
   <main class="container main-content">
     <div class="section-title-row">
       <h2>Available Events</h2>
@@ -70,7 +70,7 @@
     </div>
   </main>
 
-  <!-- Registration Modal -->
+  <!-- Event Registration Modal -->
   <div id="modal-backdrop" class="modal-layer" style="display: none;">
     <div class="modal-box">
       <div class="modal-header">
@@ -82,7 +82,7 @@
         <div class="input-field">
           <label for="event-select-field">Selected Event</label>
           <select id="event-select-field">
-            <!-- Dynamically injected -->
+            <!-- Dynamically populated via JS -->
           </select>
         </div>
 
@@ -106,6 +106,46 @@
 
         <button type="submit" class="btn btn-primary submit-btn">Confirm Registration</button>
       </form>
+    </div>
+  </div>
+
+  <!-- Performance Dashboard Modal -->
+  <div id="winnings-backdrop" class="modal-layer" style="display: none;">
+    <div class="modal-box modal-box-wide">
+      <div class="modal-header">
+        <h3>📊 Performance Dashboard</h3>
+        <button id="close-winnings-btn" class="close-x">&times;</button>
+      </div>
+
+      <!-- Subsection 1: Round Progress -->
+      <div class="dashboard-subsection">
+        <div class="subsection-header">
+          <h4>🎯 Round Progress</h4>
+          <span class="status-chip chip-active">Round 3 of 4 (In Progress)</span>
+        </div>
+        <div class="progress-section">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: 75%;"></div>
+          </div>
+          <div class="rounds-stepper">
+            <div class="step completed"><span>✓</span><small>Round 1: Idea Submission</small></div>
+            <div class="step completed"><span>✓</span><small>Round 2: Prototype Demo</small></div>
+            <div class="step active"><span>3</span><small>Round 3: Code Evaluation</small></div>
+            <div class="step"><span>4</span><small>Round 4: Grand Finale Pitch</small></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subsection 2: Certifications -->
+      <div class="dashboard-subsection">
+        <div class="subsection-header">
+          <h4>📜 Certifications & Achievements</h4>
+          <span class="counter-text">3 Verified Records</span>
+        </div>
+        <div id="certifications-grid" class="trophy-grid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -142,46 +182,6 @@
         <button id="close-notif-btn" class="close-x">&times;</button>
       </div>
       <div id="notif-list" class="notif-feed"></div>
-    </div>
-  </div>
-
- <!-- Performance Dashboard Modal -->
-  <div id="winnings-backdrop" class="modal-layer" style="display: none;">
-    <div class="modal-box modal-box-wide">
-      <div class="modal-header">
-        <h3>📊 Performance Dashboard</h3>
-        <button id="close-winnings-btn" class="close-x">&times;</button>
-      </div>
-
-      <!-- Subsection 1: Round Progress -->
-      <div class="dashboard-subsection">
-        <div class="subsection-header">
-          <h4>🎯 Round Progress</h4>
-          <span class="status-chip chip-active">Round 3 of 4 (In Progress)</span>
-        </div>
-        <div class="progress-section">
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width: 75%;"></div>
-          </div>
-          <div class="rounds-stepper">
-            <div class="step completed"><span>✓</span><small>Round 1: Idea Submission</small></div>
-            <div class="step completed"><span>✓</span><small>Round 2: Prototype Demo</small></div>
-            <div class="step active"><span>3</span><small>Round 3: Code Evaluation</small></div>
-            <div class="step"><span>4</span><small>Round 4: Grand Finale Pitch</small></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Subsection 2: Certifications & Winnings -->
-      <div class="dashboard-subsection">
-        <div class="subsection-header">
-          <h4>📜 Certifications & Achievements</h4>
-          <span class="counter-text">3 Verified Records</span>
-        </div>
-        <div id="certifications-grid" class="trophy-grid">
-          <!-- Populated dynamically via JS -->
-        </div>
-      </div>
     </div>
   </div>
 
