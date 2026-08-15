@@ -1,4 +1,4 @@
-// Master Event Data (6 Diverse Technical Events)
+// --- Master Events Catalog ---
 const eventList = [
   {
     id: "e101",
@@ -62,7 +62,7 @@ const eventList = [
   }
 ];
 
-// Certifications Data
+// --- Performance & Certifications Data ---
 const certificationsData = [
   {
     icon: "🥇",
@@ -87,7 +87,7 @@ const certificationsData = [
   }
 ];
 
-// Notifications Data
+// --- Notifications Feed Data ---
 const notificationsData = [
   {
     id: 1,
@@ -112,231 +112,206 @@ const notificationsData = [
   }
 ];
 
-// Persistent State from LocalStorage
-let userRegistrations = JSON.parse(localStorage.getItem("event_registrations")) || [];
-
-// DOM References
-const eventsContainer = document.getElementById("events-container");
-const searchBar = document.getElementById("search-bar");
-const categorySelect = document.getElementById("category-select");
-const eventsCount = document.getElementById("events-count");
-const noEventsMsg = document.getElementById("no-events-msg");
-const regBadge = document.getElementById("reg-badge");
-
-// Modals
-const modalBackdrop = document.getElementById("modal-backdrop");
-const registeredBackdrop = document.getElementById("registered-backdrop");
-const passBackdrop = document.getElementById("pass-backdrop");
-const passContent = document.getElementById("pass-content");
-const regForm = document.getElementById("reg-form");
-const modalTitle = document.getElementById("modal-title");
-const eventSelectField = document.getElementById("event-select-field");
-const registeredList = document.getElementById("registered-list");
-
-// Dashboard & Notif Modals
-const winningsBtn = document.getElementById("view-winnings-btn");
-const winningsBackdrop = document.getElementById("winnings-backdrop");
-const certGrid = document.getElementById("certifications-grid");
-const closeWinningsBtn = document.getElementById("close-winnings-btn");
-
-const notifBtn = document.getElementById("notif-btn");
-const notifBackdrop = document.getElementById("notif-backdrop");
-const notifList = document.getElementById("notif-list");
-const notifBadge = document.getElementById("notif-badge");
-const closeNotifBtn = document.getElementById("close-notif-btn");
-
-// Theme & Toast
-const themeBtn = document.getElementById("theme-btn");
-const toast = document.getElementById("toast-message");
-
-// Initialize on Load
-window.addEventListener("DOMContentLoaded", () => {
-  setupTheme();
-  renderEvents();
-  updateBadge();
-});
-
-// Theme Management
-function setupTheme() {
-  const currentTheme = localStorage.getItem("app_theme") || "light";
-  document.documentElement.setAttribute("data-theme", currentTheme);
-  if (themeBtn) {
-    themeBtn.textContent = currentTheme === "dark" ? "☀️ Mode" : "🌙 Mode";
-  }
+// --- State Variables with Safe LocalStorage ---
+let userRegistrations = [];
+try {
+  const stored = localStorage.getItem("event_registrations");
+  if (stored) userRegistrations = JSON.parse(stored);
+} catch (e) {
+  userRegistrations = [];
 }
 
-if (themeBtn) {
-  themeBtn.addEventListener("click", () => {
-    const active = document.documentElement.getAttribute("data-theme");
-    const target = active === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", target);
-    localStorage.setItem("app_theme", target);
-    themeBtn.textContent = target === "dark" ? "☀️ Mode" : "🌙 Mode";
-  });
+let userBookmarks = [];
+try {
+  const bks = localStorage.getItem("event_bookmarks");
+  if (bks) userBookmarks = JSON.parse(bks);
+} catch (e) {
+  userBookmarks = [];
 }
 
-// Performance Dashboard
-if (winningsBtn && winningsBackdrop) {
-  winningsBtn.addEventListener("click", () => {
-    if (certGrid) {
-      certGrid.innerHTML = "";
-      certificationsData.forEach(c => {
-        const card = document.createElement("div");
-        card.className = "certificate-card";
-        card.innerHTML = `
-          <div class="cert-icon">${c.icon}</div>
-          <div class="cert-meta">
-            <strong>${c.title}</strong>
-            <span>${c.authority} • ${c.date}</span>
-            <div class="cert-badge">${c.id}</div>
-          </div>
-        `;
-        certGrid.appendChild(card);
-      });
-    }
-    winningsBackdrop.style.display = "flex";
-  });
-}
+let showOnlyWishlist = false;
 
-if (closeWinningsBtn) {
-  closeWinningsBtn.addEventListener("click", () => winningsBackdrop.style.display = "none");
-}
+// --- Global UI Window Functions ---
+window.toggleAppTheme = function() {
+  const active = document.documentElement.getAttribute("data-theme") || "light";
+  const target = active === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", target);
+  try { localStorage.setItem("app_theme", target); } catch(e) {}
+  
+  const themeBtn = document.getElementById("theme-btn");
+  if (themeBtn) themeBtn.textContent = target === "dark" ? "☀️ Mode" : "🌙 Mode";
+};
 
-// Notifications
-if (notifBtn && notifBackdrop) {
-  notifBtn.addEventListener("click", () => {
-    if (notifList) {
-      notifList.innerHTML = "";
-      notificationsData.forEach(n => {
-        const card = document.createElement("div");
-        card.className = `notif-card ${n.unread ? 'unread' : ''}`;
-        card.innerHTML = `
-          <div class="notif-title-row">
-            <span>${n.title}</span>
-            <span class="notif-time">${n.time}</span>
-          </div>
-          <p>${n.desc}</p>
-        `;
-        notifList.appendChild(card);
-      });
-    }
-    if (notifBadge) notifBadge.style.display = "none";
-    notifBackdrop.style.display = "flex";
-  });
-}
-
-if (closeNotifBtn) {
-  closeNotifBtn.addEventListener("click", () => notifBackdrop.style.display = "none");
-}
-
-// Capacity Calculation
-function getRemainingSeats(eventId, total) {
-  const taken = userRegistrations.filter(r => r.eventId === eventId).length;
-  return Math.max(0, total - taken);
-}
-function renderEvents() {
-  const eventsContainer = document.getElementById("events-container");
-  const searchBar = document.getElementById("search-bar");
-  const categorySelect = document.getElementById("category-select");
-  const eventsCount = document.getElementById("events-count");
-  const noEventsMsg = document.getElementById("no-events-msg");
-
-  if (!eventsContainer) return;
-  const search = searchBar ? searchBar.value.toLowerCase().trim() : "";
-  const selectedCat = categorySelect ? categorySelect.value : "All";
-
-  const filtered = eventList.filter(item => {
-    const matchQuery = item.title.toLowerCase().includes(search) || 
-                       item.description.toLowerCase().includes(search);
-    const matchCategory = selectedCat === "All" || item.category === selectedCat;
-    return matchQuery && matchCategory;
-  });
-
-  eventsContainer.innerHTML = "";
-  if (eventsCount) eventsCount.textContent = `Showing ${filtered.length} of ${eventList.length} events`;
-
-  if (filtered.length === 0) {
-    if (noEventsMsg) noEventsMsg.style.display = "block";
-    return;
-  }
-  if (noEventsMsg) noEventsMsg.style.display = "none";
-
-  filtered.forEach((evt, index) => {
-    const isRegistered = userRegistrations.some(r => r.eventId === evt.id);
-    const seatsLeft = getRemainingSeats(evt.id, evt.totalSeats);
-    const isSoldOut = seatsLeft === 0;
-
-    let seatBadgeClass = "seat-badge";
-    if (isSoldOut) seatBadgeClass += " sold-out";
-    else if (seatsLeft <= 5) seatBadgeClass += " seat-low";
-
-    const card = document.createElement("div");
-    card.className = "event-card event-card-animated";
-    // Stagger each card animation by 50 milliseconds
-    card.style.animationDelay = `${index * 0.05}s`;
-
-    card.innerHTML = `
-      <div>
-        <div class="card-header-row">
-          <span class="tag">${evt.category}</span>
-          <span class="${seatBadgeClass}">${isSoldOut ? 'Sold Out' : seatsLeft + ' seats left'}</span>
+window.openPerformanceDashboard = function() {
+  const certGrid = document.getElementById("certifications-grid");
+  const winningsBackdrop = document.getElementById("winnings-backdrop");
+  if (certGrid) {
+    certGrid.innerHTML = "";
+    certificationsData.forEach(c => {
+      const card = document.createElement("div");
+      card.className = "certificate-card";
+      card.innerHTML = `
+        <div class="cert-icon">${c.icon}</div>
+        <div class="cert-meta">
+          <strong>${c.title}</strong>
+          <span>${c.authority} • ${c.date}</span>
+          <div class="cert-badge">${c.id}</div>
         </div>
-        <h3>${evt.title}</h3>
-        <p>${evt.description}</p>
+      `;
+      certGrid.appendChild(card);
+    });
+  }
+  if (winningsBackdrop) winningsBackdrop.style.display = "flex";
+};
+
+window.openNotificationsModal = function() {
+  const notifList = document.getElementById("notif-list");
+  const notifBadge = document.getElementById("notif-badge");
+  const notifBackdrop = document.getElementById("notif-backdrop");
+
+  if (notifList) {
+    notifList.innerHTML = "";
+    notificationsData.forEach(n => {
+      const card = document.createElement("div");
+      card.className = `notif-card ${n.unread ? 'unread' : ''}`;
+      card.innerHTML = `
+        <div class="notif-title-row">
+          <span>${n.title}</span>
+          <span class="notif-time">${n.time}</span>
+        </div>
+        <p>${n.desc}</p>
+      `;
+      notifList.appendChild(card);
+    });
+  }
+  if (notifBadge) notifBadge.style.display = "none";
+  if (notifBackdrop) notifBackdrop.style.display = "flex";
+};
+
+window.openRegisteredModal = function() {
+  const registeredList = document.getElementById("registered-list");
+  const registeredBackdrop = document.getElementById("registered-backdrop");
+  if (!registeredList) return;
+
+  registeredList.innerHTML = "";
+  if (userRegistrations.length === 0) {
+    registeredList.innerHTML = "<p class='empty-state'>You have not registered for any events yet.</p>";
+  } else {
+    userRegistrations.forEach(item => {
+      const match = eventList.find(e => e.id === item.eventId);
+      if (!match) return;
+
+      const calUrl = getGoogleCalendarUrl(match);
+      const row = document.createElement("div");
+      row.className = "reg-row";
+      row.innerHTML = `
+        <div>
+          <div class="reg-row-title">${match.title}</div>
+          <div class="reg-row-date">Pass: ${item.passId} | Date: ${match.date}</div>
+          <div class="reg-row-actions">
+            <button class="btn btn-secondary btn-sm" onclick="window.viewDigitalPass('${item.passId}')">🎫 View Pass</button>
+            <a class="btn btn-secondary btn-sm" href="${calUrl}" target="_blank" rel="noopener noreferrer">📅 Add to Cal</a>
+            <button class="btn-remove btn-sm" onclick="window.cancelRegistration('${item.passId}')">Cancel</button>
+          </div>
+        </div>
+      `;
+      registeredList.appendChild(row);
+    });
+  }
+  if (registeredBackdrop) registeredBackdrop.style.display = "flex";
+};
+
+window.viewDigitalPass = function(passId) {
+  const reg = userRegistrations.find(r => r.passId === passId);
+  if (!reg) return;
+  const evt = eventList.find(e => e.id === reg.eventId);
+  if (!evt) return;
+
+  const passContent = document.getElementById("pass-content");
+  const registeredBackdrop = document.getElementById("registered-backdrop");
+  const passBackdrop = document.getElementById("pass-backdrop");
+
+  if (passContent) {
+    passContent.innerHTML = `
+      <div class="ticket-header">
+        <h4>${evt.title}</h4>
+        <div class="ticket-id">Pass ID: ${reg.passId}</div>
       </div>
-      <div>
-        <div class="card-footer">
-          <span class="venue-info">📅 ${evt.date} | 📍 ${evt.venue.split(",")[0]}</span>
-          <button 
-            class="btn ${isRegistered || isSoldOut ? 'btn-disabled' : 'btn-primary'}" 
-            ${isRegistered || isSoldOut ? 'disabled' : ''} 
-            onclick="window.openRegisterModal('${evt.id}')">
-            ${isRegistered ? 'Registered' : isSoldOut ? 'Full' : 'Register'}
-          </button>
-        </div>
+      <div class="ticket-details">
+        <p><strong>Attendee:</strong> ${reg.name}</p>
+        <p><strong>Email:</strong> ${reg.email}</p>
+        <p><strong>Institute:</strong> ${reg.college}</p>
+        <p><strong>Date & Venue:</strong> ${evt.date} | ${evt.venue}</p>
+        <p><strong>Issued On:</strong> ${reg.registeredOn}</p>
+      </div>
+      <div class="ticket-qr-section">
+        ${generatePassQR(reg.passId)}
       </div>
     `;
-    eventsContainer.appendChild(card);
-  });
-}
-
-if (searchBar) searchBar.addEventListener("input", renderEvents);
-if (categorySelect) categorySelect.addEventListener("change", renderEvents);
-
-// Schedule Conflict Checker
-function checkScheduleConflict(targetEventId) {
-  const targetEvent = eventList.find(e => e.id === targetEventId);
-  if (!targetEvent) return null;
-
-  const conflictingReg = userRegistrations.find(reg => {
-    const regEvent = eventList.find(e => e.id === reg.eventId);
-    return regEvent && regEvent.date === targetEvent.date && regEvent.id !== targetEvent.id;
-  });
-
-  if (conflictingReg) {
-    const conflictEvent = eventList.find(e => e.id === conflictingReg.eventId);
-    return conflictEvent ? conflictEvent.title : null;
   }
-  return null;
-}
 
-// Modal Handlers
-function populateEventDropdown(selectedId) {
-  if (!eventSelectField) return;
-  eventSelectField.innerHTML = "";
-  eventList.forEach(evt => {
-    const opt = document.createElement("option");
-    opt.value = evt.id;
-    opt.textContent = `${evt.title} (${evt.date})`;
-    if (evt.id === selectedId) opt.selected = true;
-    eventSelectField.appendChild(opt);
-  });
-}
+  if (registeredBackdrop) registeredBackdrop.style.display = "none";
+  if (passBackdrop) passBackdrop.style.display = "flex";
+};
+
+window.cancelRegistration = function(passId) {
+  userRegistrations = userRegistrations.filter(r => r.passId !== passId);
+  try { localStorage.setItem("event_registrations", JSON.stringify(userRegistrations)); } catch(e) {}
+  updateBadge();
+  renderEvents();
+  window.openRegisteredModal();
+  showToast("Registration pass cancelled.");
+};
+
+window.toggleBookmark = function(eventId) {
+  if (userBookmarks.includes(eventId)) {
+    userBookmarks = userBookmarks.filter(id => id !== eventId);
+    showToast("Removed from bookmarks.");
+  } else {
+    userBookmarks.push(eventId);
+    showToast("Event saved to bookmarks ⭐");
+  }
+  try { localStorage.setItem("event_bookmarks", JSON.stringify(userBookmarks)); } catch(e) {}
+  updateBadge();
+  renderEvents();
+};
+
+window.toggleWishlistView = function() {
+  showOnlyWishlist = !showOnlyWishlist;
+  const heading = document.getElementById("section-heading");
+  const btn = document.getElementById("wishlist-toggle-btn");
+
+  if (showOnlyWishlist) {
+    if (heading) heading.textContent = "⭐ Bookmarked Events";
+    if (btn) btn.classList.add("btn-primary");
+  } else {
+    if (heading) heading.textContent = "Available Events";
+    if (btn) btn.classList.remove("btn-primary");
+  }
+  renderEvents();
+};
+
+window.shareEvent = function(title, venue) {
+  if (navigator.share) {
+    navigator.share({
+      title: title,
+      text: `Join me at ${title} (${venue}) on EventHub!`,
+      url: window.location.href
+    }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(`${title} - ${window.location.href}`);
+    showToast("Event link copied to clipboard!");
+  }
+};
 
 window.openRegisterModal = function(id) {
   populateEventDropdown(id);
   const targetEvent = eventList.find(e => e.id === id);
   if (!targetEvent) return;
+
+  const modalTitle = document.getElementById("modal-title");
+  const regForm = document.getElementById("reg-form");
+  const modalBackdrop = document.getElementById("modal-backdrop");
 
   if (modalTitle) modalTitle.textContent = `Register: ${targetEvent.title}`;
   clearErrors();
@@ -358,107 +333,269 @@ window.openRegisterModal = function(id) {
   if (modalBackdrop) modalBackdrop.style.display = "flex";
 };
 
-if (eventSelectField) {
-  eventSelectField.addEventListener("change", (e) => {
-    const newId = e.target.value;
-    const conflict = checkScheduleConflict(newId);
-    const existingWarning = document.getElementById("conflict-alert");
-    if (existingWarning) existingWarning.remove();
+// --- Initialization on Load ---
+document.addEventListener("DOMContentLoaded", () => {
+  let savedTheme = "light";
+  try { savedTheme = localStorage.getItem("app_theme") || "light"; } catch(e) {}
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  const themeBtn = document.getElementById("theme-btn");
+  if (themeBtn) themeBtn.textContent = savedTheme === "dark" ? "☀️ Mode" : "🌙 Mode";
 
-    if (conflict && regForm) {
-      const warningDiv = document.createElement("div");
-      warningDiv.id = "conflict-alert";
-      warningDiv.className = "conflict-warning";
-      warningDiv.innerHTML = `⚠️ <strong>Time Slot Warning:</strong> You already hold a pass for <em>"${conflict}"</em> on this date.`;
-      regForm.prepend(warningDiv);
-    }
+  // Bind Close Buttons
+  bindClose("close-modal-btn", "modal-backdrop");
+  bindClose("close-reg-modal-btn", "registered-backdrop");
+  bindClose("close-pass-btn", "pass-backdrop");
+  bindClose("close-winnings-btn", "winnings-backdrop");
+  bindClose("close-notif-btn", "notif-backdrop");
+
+  // Search & Filter Events
+  const searchBar = document.getElementById("search-bar");
+  const categorySelect = document.getElementById("category-select");
+  const sortSelect = document.getElementById("sort-select");
+
+  if (searchBar) searchBar.addEventListener("input", renderEvents);
+  if (categorySelect) categorySelect.addEventListener("change", renderEvents);
+  if (sortSelect) sortSelect.addEventListener("change", renderEvents);
+
+  // Form Submit
+  const regForm = document.getElementById("reg-form");
+  if (regForm) regForm.addEventListener("submit", handleRegistrationSubmit);
+
+  // Setup FAQ Accordion
+  document.querySelectorAll(".faq-question").forEach(q => {
+    q.addEventListener("click", () => {
+      const item = q.parentElement;
+      item.classList.toggle("active");
+    });
+  });
+
+  renderEvents();
+  updateBadge();
+
+  // Active Countdown Ticker
+  setInterval(renderEvents, 60000);
+});
+
+function bindClose(btnId, modalId) {
+  const btn = document.getElementById(btnId);
+  const modal = document.getElementById(modalId);
+  if (btn && modal) {
+    btn.onclick = () => modal.style.display = "none";
+  }
+}
+
+window.addEventListener("click", (e) => {
+  const modals = ["modal-backdrop", "registered-backdrop", "pass-backdrop", "winnings-backdrop", "notif-backdrop"];
+  modals.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && e.target === el) el.style.display = "none";
+  });
+});
+
+// Dynamic Countdown Formatter
+function getCountdownText(eventDate) {
+  const target = new Date(`${eventDate}T09:00:00`).getTime();
+  const now = new Date().getTime();
+  const diff = target - now;
+
+  if (diff <= 0) return "🔴 Live / Finished";
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  return `⏳ Starts in: ${days}d ${hours}h`;
+}
+
+// Search Highlighting Helper
+function highlightSearch(text, query) {
+  if (!query) return text;
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi");
+  return text.replace(regex, `<mark class="highlight">$1</mark>`);
+}
+
+// Render Event Cards Grid with Sorting
+function renderEvents() {
+  const eventsContainer = document.getElementById("events-container");
+  const searchBar = document.getElementById("search-bar");
+  const categorySelect = document.getElementById("category-select");
+  const sortSelect = document.getElementById("sort-select");
+  const eventsCount = document.getElementById("events-count");
+  const noEventsMsg = document.getElementById("no-events-msg");
+
+  if (!eventsContainer) return;
+  const search = searchBar ? searchBar.value.toLowerCase().trim() : "";
+  const selectedCat = categorySelect ? categorySelect.value : "All";
+  const sortOption = sortSelect ? sortSelect.value : "date-asc";
+
+  let filtered = eventList.filter(item => {
+    if (showOnlyWishlist && !userBookmarks.includes(item.id)) return false;
+    const matchQuery = item.title.toLowerCase().includes(search) || 
+                       item.description.toLowerCase().includes(search);
+    const matchCategory = selectedCat === "All" || item.category === selectedCat;
+    return matchQuery && matchCategory;
+  });
+
+  // Sorting Logic
+  if (sortOption === "date-asc") {
+    filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+  } else if (sortOption === "seats-asc") {
+    filtered.sort((a, b) => getRemainingSeats(a.id, a.totalSeats) - getRemainingSeats(b.id, b.totalSeats));
+  } else if (sortOption === "alpha-asc") {
+    filtered.sort((a, b) => a.title.localeCompare(b.title));
+  }
+
+  eventsContainer.innerHTML = "";
+  if (eventsCount) eventsCount.textContent = `Showing ${filtered.length} of ${eventList.length} events`;
+
+  if (filtered.length === 0) {
+    if (noEventsMsg) noEventsMsg.style.display = "block";
+    return;
+  }
+  if (noEventsMsg) noEventsMsg.style.display = "none";
+
+  filtered.forEach((evt, idx) => {
+    const isRegistered = userRegistrations.some(r => r.eventId === evt.id);
+    const isBookmarked = userBookmarks.includes(evt.id);
+    const seatsLeft = getRemainingSeats(evt.id, evt.totalSeats);
+    const isSoldOut = seatsLeft === 0;
+
+    let seatBadgeClass = "seat-badge";
+    if (isSoldOut) seatBadgeClass += " sold-out";
+    else if (seatsLeft <= 5) seatBadgeClass += " seat-low";
+
+    const card = document.createElement("div");
+    card.className = "event-card";
+    card.style.animationDelay = `${idx * 0.04}s`;
+
+    card.innerHTML = `
+      <div>
+        <div class="card-header-row">
+          <div class="card-top-left">
+            <button class="bookmark-btn ${isBookmarked ? 'active' : ''}" onclick="window.toggleBookmark('${evt.id}')" title="Bookmark event">
+              ${isBookmarked ? '★' : '☆'}
+            </button>
+            <span class="tag">${evt.category}</span>
+          </div>
+          <span class="${seatBadgeClass}">${isSoldOut ? 'Sold Out' : seatsLeft + ' seats left'}</span>
+        </div>
+        <div class="event-countdown">${getCountdownText(evt.date)}</div>
+        <h3>${highlightSearch(evt.title, search)}</h3>
+        <p>${highlightSearch(evt.description, search)}</p>
+      </div>
+      <div>
+        <div class="card-footer">
+          <span class="venue-info">📅 ${evt.date} | 📍 ${evt.venue.split(",")[0]}</span>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="window.shareEvent('${evt.title.replace(/'/g, "\\'")}', '${evt.venue.split(",")[0]}')" title="Share event">🔗</button>
+            <button 
+              class="btn ${isRegistered || isSoldOut ? 'btn-disabled' : 'btn-primary'}" 
+              ${isRegistered || isSoldOut ? 'disabled' : ''} 
+              onclick="window.openRegisterModal('${evt.id}')">
+              ${isRegistered ? 'Registered' : isSoldOut ? 'Full' : 'Register'}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    eventsContainer.appendChild(card);
   });
 }
 
-// Close Buttons
-const closeModBtn = document.getElementById("close-modal-btn");
-const closeRegBtn = document.getElementById("close-reg-modal-btn");
-const closePassBtn = document.getElementById("close-pass-btn");
+function getRemainingSeats(eventId, total) {
+  const taken = userRegistrations.filter(r => r.eventId === eventId).length;
+  return Math.max(0, total - taken);
+}
 
-if (closeModBtn) closeModBtn.addEventListener("click", () => modalBackdrop.style.display = "none");
-if (closeRegBtn) closeRegBtn.addEventListener("click", () => registeredBackdrop.style.display = "none");
-if (closePassBtn) closePassBtn.addEventListener("click", () => passBackdrop.style.display = "none");
+function checkScheduleConflict(targetEventId) {
+  const targetEvent = eventList.find(e => e.id === targetEventId);
+  if (!targetEvent) return null;
 
-window.addEventListener("click", (e) => {
-  if (e.target === modalBackdrop) modalBackdrop.style.display = "none";
-  if (e.target === registeredBackdrop) registeredBackdrop.style.display = "none";
-  if (e.target === passBackdrop) passBackdrop.style.display = "none";
-  if (e.target === winningsBackdrop) winningsBackdrop.style.display = "none";
-  if (e.target === notifBackdrop) notifBackdrop.style.display = "none";
-});
-
-// Form Validation & Submission
-if (regForm) {
-  regForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    clearErrors();
-
-    const nameInput = document.getElementById("user-name").value.trim();
-    const emailInput = document.getElementById("user-email").value.trim();
-    const collegeInput = document.getElementById("user-college").value.trim();
-    const eventId = eventSelectField ? eventSelectField.value : eventList[0].id;
-
-    let isValid = true;
-
-    if (nameInput.length < 3) {
-      document.getElementById("name-err").textContent = "Name must be at least 3 characters.";
-      isValid = false;
-    }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(emailInput)) {
-      document.getElementById("email-err").textContent = "Enter a valid email address.";
-      isValid = false;
-    }
-
-    if (collegeInput.length < 2) {
-      document.getElementById("college-err").textContent = "College name is required.";
-      isValid = false;
-    }
-
-    if (!isValid) return;
-
-    const passId = "NX-" + Math.floor(100000 + Math.random() * 900000);
-
-    userRegistrations.push({
-      passId: passId,
-      eventId: eventId,
-      name: nameInput,
-      email: emailInput,
-      college: collegeInput,
-      registeredOn: new Date().toLocaleDateString()
-    });
-
-    localStorage.setItem("event_registrations", JSON.stringify(userRegistrations));
-
-    if (modalBackdrop) modalBackdrop.style.display = "none";
-    showToast("Registration confirmed! Digital pass generated.");
-    updateBadge();
-    renderEvents();
+  const conflictingReg = userRegistrations.find(reg => {
+    const regEvent = eventList.find(e => e.id === reg.eventId);
+    return regEvent && regEvent.date === targetEvent.date && regEvent.id !== targetEvent.id;
   });
+
+  if (conflictingReg) {
+    const conflictEvent = eventList.find(e => e.id === conflictingReg.eventId);
+    return conflictEvent ? conflictEvent.title : null;
+  }
+  return null;
+}
+
+function populateEventDropdown(selectedId) {
+  const eventSelectField = document.getElementById("event-select-field");
+  if (!eventSelectField) return;
+  eventSelectField.innerHTML = "";
+  eventList.forEach(evt => {
+    const opt = document.createElement("option");
+    opt.value = evt.id;
+    opt.textContent = `${evt.title} (${evt.date})`;
+    if (evt.id === selectedId) opt.selected = true;
+    eventSelectField.appendChild(opt);
+  });
+}
+
+function handleRegistrationSubmit(e) {
+  e.preventDefault();
+  clearErrors();
+
+  const nameInput = document.getElementById("user-name").value.trim();
+  const emailInput = document.getElementById("user-email").value.trim();
+  const collegeInput = document.getElementById("user-college").value.trim();
+  const eventSelectField = document.getElementById("event-select-field");
+  const eventId = eventSelectField ? eventSelectField.value : eventList[0].id;
+
+  let isValid = true;
+  if (nameInput.length < 3) {
+    document.getElementById("name-err").textContent = "Name must be at least 3 characters.";
+    isValid = false;
+  }
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(emailInput)) {
+    document.getElementById("email-err").textContent = "Enter a valid email address.";
+    isValid = false;
+  }
+  if (collegeInput.length < 2) {
+    document.getElementById("college-err").textContent = "College name is required.";
+    isValid = false;
+  }
+
+  if (!isValid) return;
+
+  const passId = "NX-" + Math.floor(100000 + Math.random() * 900000);
+  userRegistrations.push({
+    passId: passId,
+    eventId: eventId,
+    name: nameInput,
+    email: emailInput,
+    college: collegeInput,
+    registeredOn: new Date().toLocaleDateString()
+  });
+
+  try { localStorage.setItem("event_registrations", JSON.stringify(userRegistrations)); } catch(err) {}
+
+  const modalBackdrop = document.getElementById("modal-backdrop");
+  if (modalBackdrop) modalBackdrop.style.display = "none";
+  showToast("Registration confirmed! Digital pass generated.");
+  updateBadge();
+  renderEvents();
 }
 
 function clearErrors() {
   document.querySelectorAll(".error-text").forEach(el => el.textContent = "");
 }
 
-// Google Calendar URL Generator
+function updateBadge() {
+  const regBadge = document.getElementById("reg-badge");
+  const wishlistBadge = document.getElementById("wishlist-badge");
+  if (regBadge) regBadge.textContent = userRegistrations.length;
+  if (wishlistBadge) wishlistBadge.textContent = userBookmarks.length;
+}
+
 function getGoogleCalendarUrl(evt) {
   const startDateTime = evt.date.replace(/-/g, "") + "T090000Z";
   const endDateTime = evt.date.replace(/-/g, "") + "T170000Z";
-  const title = encodeURIComponent(evt.title);
-  const details = encodeURIComponent(evt.description);
-  const location = encodeURIComponent(evt.venue);
-  
-  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDateTime}/${endDateTime}&details=${details}&location=${location}`;
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(evt.title)}&dates=${startDateTime}/${endDateTime}&details=${encodeURIComponent(evt.description)}&location=${encodeURIComponent(evt.venue)}`;
 }
 
-// QR Code SVG Generator
 function generatePassQR(passId) {
   return `
     <div class="qr-box">
@@ -487,93 +624,10 @@ function generatePassQR(passId) {
   `;
 }
 
-// Digital Pass Viewer
-window.viewDigitalPass = function(passId) {
-  const reg = userRegistrations.find(r => r.passId === passId);
-  if (!reg) return;
-  const evt = eventList.find(e => e.id === reg.eventId);
-  if (!evt) return;
-
-  if (passContent) {
-    passContent.innerHTML = `
-      <div class="ticket-header">
-        <h4>${evt.title}</h4>
-        <div class="ticket-id">Pass ID: ${reg.passId}</div>
-      </div>
-      <div class="ticket-details">
-        <p><strong>Attendee:</strong> ${reg.name}</p>
-        <p><strong>Email:</strong> ${reg.email}</p>
-        <p><strong>Institute:</strong> ${reg.college}</p>
-        <p><strong>Date & Venue:</strong> ${evt.date} | ${evt.venue}</p>
-        <p><strong>Issued On:</strong> ${reg.registeredOn}</p>
-      </div>
-      <div class="ticket-qr-section">
-        ${generatePassQR(reg.passId)}
-      </div>
-    `;
-  }
-
-  if (registeredBackdrop) registeredBackdrop.style.display = "none";
-  if (passBackdrop) passBackdrop.style.display = "flex";
-};
-
-// "My Passes" View
-const viewRegBtn = document.getElementById("view-registered-btn");
-if (viewRegBtn) {
-  viewRegBtn.addEventListener("click", () => {
-    if (!registeredList) return;
-    registeredList.innerHTML = "";
-
-    if (userRegistrations.length === 0) {
-      registeredList.innerHTML = "<p class='empty-state'>You have not registered for any events yet.</p>";
-    } else {
-      userRegistrations.forEach(item => {
-        const match = eventList.find(e => e.id === item.eventId);
-        if (!match) return;
-
-        const calUrl = getGoogleCalendarUrl(match);
-
-        const row = document.createElement("div");
-        row.className = "reg-row";
-        row.innerHTML = `
-          <div>
-            <div class="reg-row-title">${match.title}</div>
-            <div class="reg-row-date">Pass: ${item.passId} | Date: ${match.date}</div>
-            <div class="reg-row-actions">
-              <button class="btn btn-secondary btn-sm" onclick="viewDigitalPass('${item.passId}')">🎫 View Pass</button>
-              <a class="btn btn-secondary btn-sm" href="${calUrl}" target="_blank" rel="noopener noreferrer">📅 Add to Cal</a>
-              <button class="btn-remove btn-sm" onclick="cancelRegistration('${item.passId}')">Cancel</button>
-            </div>
-          </div>
-        `;
-        registeredList.appendChild(row);
-      });
-    }
-
-    if (registeredBackdrop) registeredBackdrop.style.display = "flex";
-  });
-}
-
-window.cancelRegistration = function(passId) {
-  userRegistrations = userRegistrations.filter(r => r.passId !== passId);
-  localStorage.setItem("event_registrations", JSON.stringify(userRegistrations));
-  updateBadge();
-  renderEvents();
-  if (viewRegBtn) viewRegBtn.click();
-  showToast("Registration pass cancelled.");
-};
-
-function updateBadge() {
-  if (regBadge) regBadge.textContent = userRegistrations.length;
-}
-
-
-
 function showToast(msg) {
+  const toast = document.getElementById("toast-message");
   if (!toast) return;
   toast.textContent = msg;
   toast.classList.add("visible");
-  setTimeout(() => {
-    toast.classList.remove("visible");
-  }, 3000);
+  setTimeout(() => toast.classList.remove("visible"), 3000);
 }

@@ -13,35 +13,54 @@
     <div class="nav-wrapper">
       <a href="#" class="brand">Event<span>Hub</span></a>
       <div class="nav-controls">
-        <button id="view-winnings-btn" class="btn btn-secondary" title="View Progress & Certifications">
+        <button id="view-winnings-btn" class="btn btn-secondary" onclick="window.openPerformanceDashboard()" title="View Progress & Certifications">
           📊 Performance Dashboard
         </button>
-        <button id="view-registered-btn" class="btn btn-secondary">
+        <button id="wishlist-toggle-btn" class="btn btn-secondary" onclick="window.toggleWishlistView()" title="Filter Bookmarks">
+          ⭐ Bookmarks (<span id="wishlist-badge">0</span>)
+        </button>
+        <button id="view-registered-btn" class="btn btn-secondary" onclick="window.openRegisteredModal()">
           My Passes (<span id="reg-badge">0</span>)
         </button>
-        <button id="notif-btn" class="btn btn-icon notif-trigger" title="Notifications">
+        <button id="notif-btn" class="btn btn-icon notif-trigger" onclick="window.openNotificationsModal()" title="Notifications">
           🔔<span id="notif-badge" class="notif-pill">3</span>
         </button>
-       
-        <button id="theme-btn" class="btn btn-secondary" title="Toggle Mode">🌙 Mode</button>
+        <button id="theme-btn" class="btn btn-secondary" onclick="window.toggleAppTheme()" title="Toggle Mode">🌙 Mode</button>
       </div>
     </div>
   </header>
 
-  <!-- Hero Section -->
+  <!-- Hero Section with Live Stats Banner -->
   <section class="hero-section">
     <div class="container hero-container">
       <div class="hero-badge">⚡ Flagship Tech Symposium 2026</div>
       <h1>Campus Tech Events & Hackathons</h1>
       <p>Discover hands-on workshops, competitive coding sprints, and keynote symposiums happening this season.</p>
       
+      <!-- Live Metrics Showcase -->
+      <div class="stats-ribbon">
+        <div class="stat-card">
+          <span class="stat-number">6+</span>
+          <span class="stat-label">Active Tracks</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="live-attendees-counter">280+</span>
+          <span class="stat-label">Registrations</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">₹50,000</span>
+          <span class="stat-label">Prize Bounty</span>
+        </div>
+      </div>
+
       <div class="hero-actions">
         <a href="#events-section" class="btn btn-primary btn-cta">🚀 Explore All Events</a>
       </div>
 
-      <!-- Real-time Search & Category Filters -->
+      <!-- Real-time Search, Sort & Category Controls -->
       <div class="filter-controls" id="events-section">
-        <input type="text" id="search-bar" placeholder="Search by event title or keyword..." autocomplete="off">
+        <input type="text" id="search-bar" placeholder="Search by title, description or keyword..." autocomplete="off">
+        
         <select id="category-select">
           <option value="All">All Domains</option>
           <option value="AI/ML">AI / Machine Learning</option>
@@ -50,6 +69,12 @@
           <option value="Competitive Programming">CP & DSA</option>
           <option value="Robotics">Robotics & IoT</option>
         </select>
+
+        <select id="sort-select">
+          <option value="date-asc">📅 Earliest Date</option>
+          <option value="seats-asc">🔥 Fewest Seats Left</option>
+          <option value="alpha-asc">🔤 Title (A - Z)</option>
+        </select>
       </div>
     </div>
   </section>
@@ -57,18 +82,40 @@
   <!-- Event Listing Section -->
   <main class="container main-content">
     <div class="section-title-row">
-      <h2>Available Events</h2>
+      <h2 id="section-heading">Available Events</h2>
       <span id="events-count" class="counter-text">Loading events...</span>
     </div>
 
     <div id="events-container" class="cards-grid"></div>
 
     <div id="no-events-msg" class="empty-state" style="display: none;">
-      <p>No events found matching your search criteria.</p>
+      <p>No events found matching your criteria.</p>
     </div>
+
+    <!-- Interactive FAQ Section -->
+    <section class="faq-section">
+      <div class="faq-header">
+        <h3>💡 Frequently Asked Questions</h3>
+        <p>Everything you need to know about registrations, team formats, and venue access.</p>
+      </div>
+      <div class="faq-accordion">
+        <div class="faq-item">
+          <button class="faq-question">Who is eligible to participate in these events? <span>+</span></button>
+          <div class="faq-answer">All undergraduate and postgraduate students from recognized technical colleges are eligible with a valid student ID card.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">Can I register for multiple technical tracks? <span>+</span></button>
+          <div class="faq-answer">Yes, as long as the event schedules do not clash. The system automatically alerts you if two events occur on the same date.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">How do I present my ticket at the venue? <span>+</span></button>
+          <div class="faq-answer">Open the "My Passes" modal to present your digital ticket with its unique SVG QR code, or print the pass as a PDF.</div>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <!-- Event Registration Modal -->
+  <!-- Registration Modal -->
   <div id="modal-backdrop" class="modal-layer" style="display: none;">
     <div class="modal-box">
       <div class="modal-header">
@@ -79,9 +126,7 @@
       <form id="reg-form" novalidate>
         <div class="input-field">
           <label for="event-select-field">Selected Event</label>
-          <select id="event-select-field">
-            <!-- Dynamically populated via JS -->
-          </select>
+          <select id="event-select-field"></select>
         </div>
 
         <div class="input-field">
@@ -140,9 +185,7 @@
           <h4>📜 Certifications & Achievements</h4>
           <span class="counter-text">3 Verified Records</span>
         </div>
-        <div id="certifications-grid" class="trophy-grid">
-          <!-- Populated dynamically via JS -->
-        </div>
+        <div id="certifications-grid" class="trophy-grid"></div>
       </div>
     </div>
   </div>
@@ -186,6 +229,6 @@
   <!-- Toast Notification Popup -->
   <div id="toast-message" class="toast-popup"></div>
 
-  <script src="script.js?v=2"></script>
+  <script src="script.js?v=final"></script>
 </body>
 </html>
