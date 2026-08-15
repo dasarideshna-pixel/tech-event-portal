@@ -396,3 +396,94 @@ input:focus, select:focus {
 .toast-popup.visible {
   opacity: 1;
 }
+/* Wide Modal */
+.modal-box-wide {
+  max-width: 580px;
+}
+
+/* Seat Progress Bar */
+.seat-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background-color: var(--tag-bg);
+  color: var(--tag-text);
+}
+
+.seat-low {
+  background-color: #ffebe9;
+  color: var(--danger-color);
+}
+
+.sold-out {
+  background-color: var(--border-color);
+  color: var(--subtext-color);
+}
+
+/* Action Buttons inside Cards & Passes */
+.card-actions-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.reg-row-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
+
+/* Ticket Pass Styles */
+.ticket-pass {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--bg-color);
+  margin-bottom: 16px;
+}
+
+.ticket-header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.ticket-id {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--primary-color);
+}
+
+.ticket-details p {
+  font-size: 0.85rem;
+  margin: 4px 0;
+  color: var(--text-color);
+}
+
+.pass-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Print Handling */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #pass-content, #pass-content * {
+    visibility: visible;
+  }
+  #pass-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: 2px solid #000;
+  }
+}

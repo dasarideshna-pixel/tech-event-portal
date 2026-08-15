@@ -8,7 +8,7 @@
 </head>
 <body>
 
-  <!-- top nav -->
+  <!-- Top Navigation Bar -->
   <header class="navbar">
     <div class="nav-wrapper">
       <a href="#" class="brand">Event<span>Hub</span></a>
@@ -21,6 +21,7 @@
     </div>
   </header>
 
+  <!-- Hero Section & Filters -->
   <section class="hero-section">
     <div class="container hero-container">
       <h1>Campus Tech Events & Hackathons</h1>
@@ -40,13 +41,13 @@
     </div>
   </section>
 
+  <!-- Events Grid -->
   <main class="container main-content">
     <div class="section-title-row">
       <h2>Available Events</h2>
       <span id="events-count" class="counter-text">Loading events...</span>
     </div>
 
-    <!-- events get injected here by script.js -->
     <div id="events-container" class="cards-grid"></div>
 
     <div id="no-events-msg" class="empty-state" style="display:none;">
@@ -54,8 +55,8 @@
     </div>
   </main>
 
-  <!-- registration modal -->
-  <div id="modal-backdrop" class="modal-layer" style="display:none;">
+  <!-- Registration Modal -->
+  <div id="modal-backdrop" class="modal-layer" style="display: none;">
     <div class="modal-box">
       <div class="modal-header">
         <h3 id="modal-title">Event Registration</h3>
@@ -88,19 +89,35 @@
     </div>
   </div>
 
-  <!-- "my registrations" drawer -->
-  <div id="registered-backdrop" class="modal-layer" style="display:none;">
-    <div class="modal-box">
+  <!-- Registered Events Modal -->
+  <div id="registered-backdrop" class="modal-layer" style="display: none;">
+    <div class="modal-box modal-box-wide">
       <div class="modal-header">
-        <h3>My Registered Events</h3>
+        <h3>My Registered Passes</h3>
         <button id="close-reg-modal-btn" class="close-x">&times;</button>
       </div>
       <div id="registered-list" class="registered-list-wrapper"></div>
     </div>
   </div>
 
+  <!-- Printable Digital Pass Modal -->
+  <div id="pass-backdrop" class="modal-layer" style="display: none;">
+    <div class="modal-box pass-card-container">
+      <div class="modal-header">
+        <h3>Attendee Pass</h3>
+        <button id="close-pass-btn" class="close-x">&times;</button>
+      </div>
+      <div id="pass-content" class="ticket-pass"></div>
+      <div class="pass-actions">
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print / Save PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Popup -->
   <div id="toast-message" class="toast-popup"></div>
 
+  <!-- Main JavaScript Logic -->
   <script src="script.js"></script>
 </body>
 </html>

@@ -1,11 +1,13 @@
-// Sample Event Data
+// Master Event Data with Capacity Limits
 const eventList = [
   {
     id: "e101",
     title: "National Hackathon 2026",
     category: "Web",
     date: "2026-09-20",
+    time: "09:00",
     venue: "Main Audi, Ground Floor",
+    totalSeats: 50,
     description: "24-hour sprint to build solutions using Web and API integration."
   },
   {
@@ -13,7 +15,9 @@ const eventList = [
     title: "Intro to LLMs & Neural Networks",
     category: "AI/ML",
     date: "2026-09-25",
+    time: "10:00",
     venue: "CSE Seminar Hall",
+    totalSeats: 30,
     description: "Hands-on workshop covering transformer architectures and model fine-tuning."
   },
   {
@@ -21,7 +25,9 @@ const eventList = [
     title: "Capture The Flag (CTF) Challenge",
     category: "Cybersecurity",
     date: "2026-10-02",
+    time: "11:30",
     venue: "Computer Lab 4",
+    totalSeats: 25,
     description: "Test your skills in cryptography, binary analysis, and web security."
   },
   {
@@ -29,7 +35,9 @@ const eventList = [
     title: "Speed Coding & Algorithms Contest",
     category: "Competitive Programming",
     date: "2026-10-05",
+    time: "14:00",
     venue: "Online / CodePlatform",
+    totalSeats: 100,
     description: "Solve algorithmic problems under time constraints. DSA focused."
   },
   {
@@ -37,7 +45,9 @@ const eventList = [
     title: "Autonomous Drone & Robotics Expo",
     category: "Robotics",
     date: "2026-10-12",
+    time: "09:30",
     venue: "Mechanical Workshop Quad",
+    totalSeats: 40,
     description: "Showcase of quadcopters, micro-controllers, and embedded ROS systems."
   },
   {
@@ -45,15 +55,17 @@ const eventList = [
     title: "Deep Dive into Data Pipelines",
     category: "AI/ML",
     date: "2026-10-18",
+    time: "15:00",
     venue: "Virtual Room A",
+    totalSeats: 35,
     description: "Building scalable ingestion and preprocessing pipelines with Python."
   }
 ];
 
-// Persistent state
+// Persistent State
 let userRegistrations = JSON.parse(localStorage.getItem("event_registrations")) || [];
 
-// DOM references
+// DOM References
 const eventsContainer = document.getElementById("events-container");
 const searchBar = document.getElementById("search-bar");
 const categorySelect = document.getElementById("category-select");
@@ -61,19 +73,20 @@ const eventsCount = document.getElementById("events-count");
 const noEventsMsg = document.getElementById("no-events-msg");
 const regBadge = document.getElementById("reg-badge");
 
-// Modal elements
+// Modals
 const modalBackdrop = document.getElementById("modal-backdrop");
 const registeredBackdrop = document.getElementById("registered-backdrop");
+const passBackdrop = document.getElementById("pass-backdrop");
+const passContent = document.getElementById("pass-content");
 const regForm = document.getElementById("reg-form");
 const modalTitle = document.getElementById("modal-title");
 const formEventId = document.getElementById("form-event-id");
 const registeredList = document.getElementById("registered-list");
 
-// Theme
+// Theme & Toast
 const themeBtn = document.getElementById("theme-btn");
 const toast = document.getElementById("toast-message");
 
-// Initialize on page load
 window.addEventListener("DOMContentLoaded", () => {
   setupTheme();
   renderEvents();
@@ -94,6 +107,12 @@ themeBtn.addEventListener("click", () => {
   localStorage.setItem("app_theme", target);
   themeBtn.textContent = target === "dark" ? "☀️" : "🌙";
 });
+
+// Calculate Remaining Seats
+function getRemainingSeats(eventId, total) {
+  const taken = userRegistrations.filter(r => r.eventId === eventId).length;
+  return Math.max(0, total - taken);
+}
 
 // Render Event Cards
 function renderEvents() {
@@ -118,26 +137,32 @@ function renderEvents() {
 
   filtered.forEach(evt => {
     const isRegistered = userRegistrations.some(r => r.eventId === evt.id);
-    
+    const seatsLeft = getRemainingSeats(evt.id, evt.totalSeats);
+    const isSoldOut = seatsLeft === 0;
+
+    let seatBadgeClass = "seat-badge";
+    if (isSoldOut) seatBadgeClass += " sold-out";
+    else if (seatsLeft <= 5) seatBadgeClass += " seat-low";
+
     const card = document.createElement("div");
     card.className = "event-card";
     card.innerHTML = `
       <div>
         <div class="card-header-row">
           <span class="tag">${evt.category}</span>
-          <span class="event-date-badge">${evt.date}</span>
+          <span class="${seatBadgeClass}">${isSoldOut ? 'Sold Out' : seatsLeft + ' seats left'}</span>
         </div>
         <h3>${evt.title}</h3>
         <p>${evt.description}</p>
       </div>
       <div>
         <div class="card-footer">
-          <span class="venue-info">📍 ${evt.venue}</span>
+          <span class="venue-info">📅 ${evt.date} | 📍 ${evt.venue.split(",")[0]}</span>
           <button 
-            class="btn ${isRegistered ? 'btn-disabled' : 'btn-primary'}" 
-            ${isRegistered ? 'disabled' : ''} 
+            class="btn ${isRegistered || isSoldOut ? 'btn-disabled' : 'btn-primary'}" 
+            ${isRegistered || isSoldOut ? 'disabled' : ''} 
             onclick="openRegisterModal('${evt.id}')">
-            ${isRegistered ? 'Registered' : 'Register'}
+            ${isRegistered ? 'Registered' : isSoldOut ? 'Full' : 'Register'}
           </button>
         </div>
       </div>
@@ -146,11 +171,11 @@ function renderEvents() {
   });
 }
 
-// Event Listeners for Filters
+// Filters
 searchBar.addEventListener("input", renderEvents);
 categorySelect.addEventListener("change", renderEvents);
 
-// Modal Operations
+// Modal Logic
 function openRegisterModal(id) {
   const targetEvent = eventList.find(e => e.id === id);
   if (!targetEvent) return;
@@ -162,20 +187,17 @@ function openRegisterModal(id) {
   modalBackdrop.style.display = "flex";
 }
 
-document.getElementById("close-modal-btn").addEventListener("click", () => {
-  modalBackdrop.style.display = "none";
-});
-
-document.getElementById("close-reg-modal-btn").addEventListener("click", () => {
-  registeredBackdrop.style.display = "none";
-});
+document.getElementById("close-modal-btn").addEventListener("click", () => modalBackdrop.style.display = "none");
+document.getElementById("close-reg-modal-btn").addEventListener("click", () => registeredBackdrop.style.display = "none");
+document.getElementById("close-pass-btn").addEventListener("click", () => passBackdrop.style.display = "none");
 
 window.addEventListener("click", (e) => {
   if (e.target === modalBackdrop) modalBackdrop.style.display = "none";
   if (e.target === registeredBackdrop) registeredBackdrop.style.display = "none";
+  if (e.target === passBackdrop) passBackdrop.style.display = "none";
 });
 
-// Form Validation and Submission
+// Form Submission
 regForm.addEventListener("submit", (e) => {
   e.preventDefault();
   clearErrors();
@@ -188,7 +210,7 @@ regForm.addEventListener("submit", (e) => {
   let isValid = true;
 
   if (nameInput.length < 3) {
-    document.getElementById("name-err").textContent = "Please enter your full name (minimum 3 characters).";
+    document.getElementById("name-err").textContent = "Name must be at least 3 characters.";
     isValid = false;
   }
 
@@ -199,25 +221,28 @@ regForm.addEventListener("submit", (e) => {
   }
 
   if (collegeInput.length < 2) {
-    document.getElementById("college-err").textContent = "Please provide your college name.";
+    document.getElementById("college-err").textContent = "College name is required.";
     isValid = false;
   }
 
   if (!isValid) return;
 
-  // Store registration
+  // Generate a realistic registration ID
+  const passId = "NX-" + Math.floor(100000 + Math.random() * 900000);
+
   userRegistrations.push({
+    passId: passId,
     eventId: eventId,
     name: nameInput,
     email: emailInput,
     college: collegeInput,
-    time: new Date().toLocaleDateString()
+    registeredOn: new Date().toLocaleDateString()
   });
 
   localStorage.setItem("event_registrations", JSON.stringify(userRegistrations));
 
   modalBackdrop.style.display = "none";
-  showToast("Registration saved successfully!");
+  showToast("Registration successful! Pass generated.");
   updateBadge();
   renderEvents();
 });
@@ -225,6 +250,42 @@ regForm.addEventListener("submit", (e) => {
 function clearErrors() {
   document.querySelectorAll(".error-text").forEach(el => el.textContent = "");
 }
+
+// Google Calendar URL Generator
+function getGoogleCalendarUrl(evt) {
+  const startDateTime = evt.date.replace(/-/g, "") + "T090000Z";
+  const endDateTime = evt.date.replace(/-/g, "") + "T170000Z";
+  const title = encodeURIComponent(evt.title);
+  const details = encodeURIComponent(evt.description);
+  const location = encodeURIComponent(evt.venue);
+  
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDateTime}/${endDateTime}&details=${details}&location=${location}`;
+}
+
+// Open Digital Pass
+window.viewDigitalPass = function(passId) {
+  const reg = userRegistrations.find(r => r.passId === passId);
+  if (!reg) return;
+  const evt = eventList.find(e => e.id === reg.eventId);
+  if (!evt) return;
+
+  passContent.innerHTML = `
+    <div class="ticket-header">
+      <h4>${evt.title}</h4>
+      <div class="ticket-id">Pass ID: ${reg.passId}</div>
+    </div>
+    <div class="ticket-details">
+      <p><strong>Attendee:</strong> ${reg.name}</p>
+      <p><strong>Email:</strong> ${reg.email}</p>
+      <p><strong>Institute:</strong> ${reg.college}</p>
+      <p><strong>Date & Venue:</strong> ${evt.date} | ${evt.venue}</p>
+      <p><strong>Issued On:</strong> ${reg.registeredOn}</p>
+    </div>
+  `;
+
+  registeredBackdrop.style.display = "none";
+  passBackdrop.style.display = "flex";
+};
 
 // "My Registrations" Drawer
 document.getElementById("view-registered-btn").addEventListener("click", () => {
@@ -237,14 +298,20 @@ document.getElementById("view-registered-btn").addEventListener("click", () => {
       const match = eventList.find(e => e.id === item.eventId);
       if (!match) return;
 
+      const calUrl = getGoogleCalendarUrl(match);
+
       const row = document.createElement("div");
       row.className = "reg-row";
       row.innerHTML = `
         <div>
           <div class="reg-row-title">${match.title}</div>
-          <div class="reg-row-date">Date: ${match.date} | Venue: ${match.venue}</div>
+          <div class="reg-row-date">Pass: ${item.passId} | Date: ${match.date}</div>
+          <div class="reg-row-actions">
+            <button class="btn btn-secondary btn-sm" onclick="viewDigitalPass('${item.passId}')">🎫 View Pass</button>
+            <a class="btn btn-secondary btn-sm" href="${calUrl}" target="_blank" rel="noopener noreferrer">📅 Add to Cal</a>
+            <button class="btn-remove btn-sm" onclick="cancelRegistration('${match.id}')">Cancel</button>
+          </div>
         </div>
-        <button class="btn-remove" onclick="cancelRegistration('${match.id}')">Cancel</button>
       `;
       registeredList.appendChild(row);
     });
