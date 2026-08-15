@@ -127,9 +127,75 @@
       </div>
     </div>
   </div>
+  <!-- Notification Center Dropdown / Modal -->
+  <div id="notif-backdrop" class="modal-layer" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🔔 Live Campus Updates</h3>
+        <button id="close-notif-btn" class="close-x">&times;</button>
+      </div>
+      <div id="notif-list" class="notif-feed">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Rounds Tracker & "All My Winnings" Vault Modal -->
+  <div id="winnings-backdrop" class="modal-layer" style="display: none;">
+    <div class="modal-box modal-box-wide">
+      <div class="modal-header">
+        <h3>🏆 Participant Career & Winnings Hub</h3>
+        <button id="close-winnings-btn" class="close-x">&times;</button>
+      </div>
+      
+      <!-- Rounds & Progress Tracker -->
+      <div class="progress-section">
+        <div class="progress-header">
+          <span><strong>Hackathon Progression:</strong> Round 3 of 4</span>
+          <span class="status-chip chip-active">In Progress</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width: 75%;"></div>
+        </div>
+        <div class="rounds-stepper">
+          <div class="step completed"><span>✓</span><small>Round 1: Idea Submission</small></div>
+          <div class="step completed"><span>✓</span><small>Round 2: Prototype Demo</small></div>
+          <div class="step active"><span>3</span><small>Round 3: Code Evaluation</small></div>
+          <div class="step"><span>4</span><small>Round 4: Grand Finale Pitch</small></div>
+        </div>
+      </div>
+
+      <!-- Winnings & Trophy Room -->
+      <h4 class="subheading-vault">🎖️ Hall of Fame & Badges</h4>
+      <div id="winnings-grid" class="trophy-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
 
   <!-- Toast Notification Popup -->
   <div id="toast-message" class="toast-popup"></div>
+  <!-- Navigation Bar Update -->
+  <header class="navbar">
+    <div class="nav-wrapper">
+      <a href="#" class="brand">Event<span>Hub</span></a>
+      <div class="nav-controls">
+        <button id="view-winnings-btn" class="btn btn-secondary" title="View Competition Progress & Winnings">
+          🏆 My Winnings & Rounds
+        </button>
+        <button id="view-registered-btn" class="btn btn-secondary">
+          My Passes (<span id="reg-badge">0</span>)
+        </button>
+        <button id="notif-btn" class="btn btn-icon notif-trigger" title="Notifications">
+          🔔<span id="notif-badge" class="notif-pill">3</span>
+        </button>
+        <button id="export-csv-btn" class="btn btn-secondary" title="Export attendee roster">
+          📊 Export CSV
+        </button>
+        <button id="theme-btn" class="btn btn-icon" title="Toggle theme">🌙</button>
+      </div>
+    </div>
+  </header>
 
   <script src="script.js"></script>
 </body>

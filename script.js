@@ -473,3 +473,112 @@ function showToast(msg) {
     toast.classList.remove("visible");
   }, 3000);
 }
+// --- Notifications & Announcements State ---
+const notificationsData = [
+  {
+    id: 1,
+    title: "Round 2 Results Published",
+    time: "10 mins ago",
+    desc: "Shortlisted for Round 3 Code Evaluation in IITB GenAI Hackathon.",
+    unread: true
+  },
+  {
+    id: 2,
+    title: "Workshop Venue Updated",
+    time: "2 hours ago",
+    desc: "The Neural Networks workshop shifted to Room 204.",
+    unread: true
+  },
+  {
+    id: 3,
+    title: "Cyber CTF Credentials Issued",
+    time: "Yesterday",
+    desc: "Your VPN keys and test environment access are active.",
+    unread: false
+  }
+];
+
+// --- Winnings & Achievements Data ---
+const winningsData = [
+  {
+    icon: "🥇",
+    title: "1st Place Winner",
+    event: "Web3 Scalability Sprint 2026",
+    prize: "₹25,000 + Certificate of Merit"
+  },
+  {
+    icon: "🥈",
+    title: "Runner Up",
+    event: "Autonomous Drone Robotics Expo",
+    prize: "₹10,000 + Tech Trophy"
+  },
+  {
+    icon: "🏅",
+    title: "Top 5 Finalist",
+    event: "Algorithmic Speed Coding Cup",
+    prize: "Special Commendation Badge"
+  }
+];
+
+// --- Modal Handlers for Notifications & Winnings ---
+const notifBtn = document.getElementById("notif-btn");
+const notifBackdrop = document.getElementById("notif-backdrop");
+const notifList = document.getElementById("notif-list");
+const notifBadge = document.getElementById("notif-badge");
+const closeNotifBtn = document.getElementById("close-notif-btn");
+
+const winningsBtn = document.getElementById("view-winnings-btn");
+const winningsBackdrop = document.getElementById("winnings-backdrop");
+const winningsGrid = document.getElementById("winnings-grid");
+const closeWinningsBtn = document.getElementById("close-winnings-btn");
+
+// Render Notifications
+notifBtn.addEventListener("click", () => {
+  notifList.innerHTML = "";
+  notificationsData.forEach(n => {
+    const card = document.createElement("div");
+    card.className = `notif-card ${n.unread ? 'unread' : ''}`;
+    card.innerHTML = `
+      <div class="notif-title-row">
+        <span>${n.title}</span>
+        <span class="notif-time">${n.time}</span>
+      </div>
+      <p>${n.desc}</p>
+    `;
+    notifList.appendChild(card);
+  });
+  
+  // Clear badge upon opening
+  notifBadge.style.display = "none";
+  notifBackdrop.style.display = "flex";
+});
+
+closeNotifBtn.addEventListener("click", () => notifBackdrop.style.display = "none");
+
+// Render Winnings & Progress
+winningsBtn.addEventListener("click", () => {
+  winningsGrid.innerHTML = "";
+  winningsData.forEach(w => {
+    const card = document.createElement("div");
+    card.className = "trophy-card";
+    card.innerHTML = `
+      <div class="trophy-icon">${w.icon}</div>
+      <div>
+        <strong>${w.title}</strong>
+        <span>${w.event}</span>
+        <div style="font-size:0.7rem; color:var(--primary-color); margin-top:2px;">${w.prize}</div>
+      </div>
+    `;
+    winningsGrid.appendChild(card);
+  });
+
+  winningsBackdrop.style.display = "flex";
+});
+
+closeWinningsBtn.addEventListener("click", () => winningsBackdrop.style.display = "none");
+
+// Click outside to close
+window.addEventListener("click", (e) => {
+  if (e.target === notifBackdrop) notifBackdrop.style.display = "none";
+  if (e.target === winningsBackdrop) winningsBackdrop.style.display = "none";
+});

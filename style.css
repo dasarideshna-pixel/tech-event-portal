@@ -572,3 +572,176 @@ input:focus, select:focus {
     border: 2px solid #000;
   }
 }
+/* Notification Trigger & Badge */
+.notif-trigger {
+  position: relative;
+}
+
+.notif-pill {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: var(--danger-color);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+/* Notification Feed */
+.notif-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.notif-card {
+  padding: 10px 12px;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+}
+
+.notif-card.unread {
+  border-left: 4px solid var(--primary-color);
+}
+
+.notif-title-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.notif-time {
+  font-size: 0.7rem;
+  color: var(--subtext-color);
+}
+
+.notif-card p {
+  font-size: 0.8rem;
+  color: var(--subtext-color);
+}
+
+/* Rounds & Progress Tracker */
+.progress-section {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.status-chip {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.chip-active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background-color: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--primary-color);
+  transition: width 0.4s ease;
+}
+
+.rounds-stepper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  text-align: center;
+}
+
+.step span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--border-color);
+  color: var(--text-color);
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.step small {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--subtext-color);
+  line-height: 1.2;
+}
+
+.step.completed span {
+  background-color: var(--success-color);
+  color: #ffffff;
+}
+
+.step.active span {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.25);
+}
+
+/* Winnings & Trophy Grid */
+.subheading-vault {
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+.trophy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.trophy-card {
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.trophy-icon {
+  font-size: 1.8rem;
+}
+
+.trophy-card strong {
+  display: block;
+  font-size: 0.85rem;
+}
+
+.trophy-card span {
+  font-size: 0.75rem;
+  color: var(--subtext-color);
+}
